@@ -1,15 +1,20 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const authRoutes = require('./routes/authRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const enrollmentRoutes = require('./routes/enrollmentRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Serve uploaded files as static assets
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'OK', message: 'Backend is running smoothly' });
@@ -19,6 +24,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
+app.use('/api/profile', profileRoutes);
 
 const PORT = process.env.PORT || 5000;
 

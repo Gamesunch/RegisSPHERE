@@ -54,7 +54,19 @@ const translations = {
         'news_2_title': 'Course Registration',
         'news_2_desc': 'Fall semester enrollment period begins next Monday at 8:00 AM.',
         'loading': 'Loading System...',
-        'student_role_display': 'Student'
+        'student_role_display': 'Student',
+
+        // Settings
+        'personal_info': 'Personal Information',
+        'academic_info': 'Academic Information',
+        'personal_settings_desc': 'Manage your profile and personal details here.',
+        'profile_picture': 'Profile Picture',
+        'upload_photo': 'Upload Photo',
+        'bio': 'Bio',
+        'university': 'University',
+        'major': 'Major',
+        'year_of_study': 'Year of Study',
+        'save_changes': 'Save Changes'
     },
     th: {
         // App / Common
@@ -111,7 +123,19 @@ const translations = {
         'news_2_title': 'การลงทะเบียนเรียน',
         'news_2_desc': 'ช่วงเวลาการลงทะเบียนเรียนภาคเรียนเริ่มวันจันทร์หน้าเวลา 08:00 น.',
         'loading': 'กำลังโหลด...',
-        'student_role_display': 'นักศึกษา'
+        'student_role_display': 'นักศึกษา',
+
+        // Settings
+        'personal_info': 'ข้อมูลส่วนตัว',
+        'academic_info': 'ข้อมูลการศึกษา',
+        'personal_settings_desc': 'จัดการโปรไฟล์และรายละเอียดส่วนตัวของคุณที่นี่',
+        'profile_picture': 'รูปโปรไฟล์',
+        'upload_photo': 'อัปโหลดรูปภาพ',
+        'bio': 'ประวัติส่วนตัว',
+        'university': 'มหาวิทยาลัย',
+        'major': 'สาขาวิชา',
+        'year_of_study': 'ชั้นปีที่',
+        'save_changes': 'บันทึกการเปลี่ยนแปลง'
     }
 };
 

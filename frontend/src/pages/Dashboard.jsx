@@ -22,8 +22,18 @@ export default function Dashboard() {
         // Fetch user and system data
         const fetchData = async () => {
             try {
-                const userStored = JSON.parse(localStorage.getItem('user'));
-                setUser(userStored);
+                // Fetch profile from API for latest data (including picture)
+                const profileRes = await fetch('http://localhost:5000/api/profile', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (profileRes.ok) {
+                    const profileData = await profileRes.json();
+                    setUser(profileData);
+                } else {
+                    // Fallback to localStorage
+                    const userStored = JSON.parse(localStorage.getItem('user'));
+                    setUser(userStored);
+                }
 
                 // Fetch courses
                 const courseRes = await fetch('http://localhost:5000/api/courses', {
@@ -86,19 +96,21 @@ export default function Dashboard() {
 
                 <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1 }}>
                     {[
-                        { icon: LayoutDashboard, label: t('overview'), active: true },
+                        { icon: LayoutDashboard, label: t('overview'), active: true, path: '/dashboard' },
                         { icon: BookOpen, label: t('my_courses') },
                         { icon: Users, label: t('enrollment') },
-                        { icon: Settings, label: t('settings') }
+                        { icon: Settings, label: t('settings'), path: '/settings' }
                     ].map((item, i) => (
-                        <button key={i} style={{
-                            display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.2rem', width: '100%', border: 'none',
-                            background: item.active ? 'linear-gradient(90deg, rgba(139,92,246,0.25), transparent)' : 'transparent',
-                            color: item.active ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                            borderLeft: item.active ? '4px solid var(--color-primary)' : '4px solid transparent',
-                            borderRadius: '0 12px 12px 0', cursor: 'pointer', fontSize: '1rem', fontWeight: 500, fontFamily: 'var(--font-main)',
-                            transition: 'all 0.3s ease'
-                        }}
+                        <button key={i}
+                            onClick={() => item.path && navigate(item.path)}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.2rem', width: '100%', border: 'none',
+                                background: item.active ? 'linear-gradient(90deg, rgba(242, 159, 5, 0.15), transparent)' : 'transparent',
+                                color: item.active ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                                borderLeft: item.active ? '4px solid var(--color-primary)' : '4px solid transparent',
+                                borderRadius: '0 12px 12px 0', cursor: 'pointer', fontSize: '1rem', fontWeight: 500, fontFamily: 'var(--font-main)',
+                                transition: 'all 0.3s ease'
+                            }}
                             onMouseEnter={(e) => {
                                 if (!item.active) e.currentTarget.style.color = 'var(--color-primary)';
                             }}
@@ -148,9 +160,13 @@ export default function Dashboard() {
                             <Bell size={20} />
                             <span style={{ position: 'absolute', top: '12px', right: '12px', width: '10px', height: '10px', background: '#ef4444', borderRadius: '50%', border: '2px solid var(--color-bg-light)' }}></span>
                         </motion.button>
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--color-primary-dark)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(217, 121, 4, 0.3)', cursor: 'pointer' }}>
-                            {user.firstName ? user.firstName[0].toUpperCase() : 'U'}
-                        </div>
+                        {user.profilePictureUrl ? (
+                            <img src={`http://localhost:5000${user.profilePictureUrl}`} alt="Profile" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 10px rgba(217, 121, 4, 0.3)', cursor: 'pointer' }} />
+                        ) : (
+                            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--color-primary-dark)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(217, 121, 4, 0.3)', cursor: 'pointer' }}>
+                                {user.firstName ? user.firstName[0].toUpperCase() : 'U'}
+                            </div>
+                        )}
                     </div>
                 </motion.header>
 

@@ -59,7 +59,12 @@ exports.login = async (req, res) => {
                 email: user.email,
                 firstName: user.first_name,
                 lastName: user.last_name,
-                role: user.role
+                role: user.role,
+                bio: user.bio || '',
+                profilePictureUrl: user.profile_picture_url || '',
+                university: user.university || '',
+                major: user.major || '',
+                yearOfStudy: user.year_of_study || ''
             }
         });
     } catch (error) {
@@ -71,13 +76,26 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
     try {
         const result = await db.query(
-            'SELECT id, email, first_name, last_name, role, created_at FROM users WHERE id = $1',
+            'SELECT id, email, first_name, last_name, role, bio, profile_picture_url, university, major, year_of_study, created_at FROM users WHERE id = $1',
             [req.user.id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
-        res.json(result.rows[0]);
+        const u = result.rows[0];
+        res.json({
+            id: u.id,
+            email: u.email,
+            firstName: u.first_name,
+            lastName: u.last_name,
+            role: u.role,
+            bio: u.bio || '',
+            profilePictureUrl: u.profile_picture_url || '',
+            university: u.university || '',
+            major: u.major || '',
+            yearOfStudy: u.year_of_study || '',
+            createdAt: u.created_at
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Server error fetching profile' });
