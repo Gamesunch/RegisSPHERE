@@ -90,7 +90,29 @@ const translations = {
         'drop_btn': 'Drop',
         'drop_confirm': 'Are you sure you want to drop this course?',
         'drop_success': 'Course dropped successfully.',
-        'drop_error': 'Failed to drop course. Please try again.'
+        'drop_error': 'Failed to drop course. Please try again.',
+
+        // Tabs & Timetable
+        'tab_courses': 'Enrolled Courses',
+        'tab_timetable': 'Study Timetable',
+        'tab_exam': 'Exam Schedule',
+        'day_time': 'Day / Time',
+        'download_timetable': 'Download as PNG',
+        'course_code': 'Course Code',
+        'course_name_label': 'Course Name',
+        'midterm_exam': 'Midterm Exam',
+        'final_exam': 'Final Exam',
+        'total': 'Total',
+        'no_professor': 'TBA',
+
+        // Grades
+        'grades': 'Grades',
+        'grades_desc': 'View your academic performance and grades.',
+        'cumulative_gpax': 'Cumulative GPAX',
+        'all_years': 'All Academic Years',
+        'academic_year': 'Academic Year',
+        'no_grades': 'No grades available yet.',
+        'grade_label': 'Grade'
     },
     th: {
         // App / Common
@@ -183,7 +205,29 @@ const translations = {
         'drop_btn': 'ถอน',
         'drop_confirm': 'คุณแน่ใจหรือไม่ว่าต้องการถอนรายวิชานี้?',
         'drop_success': 'ถอนรายวิชาสำเร็จ',
-        'drop_error': 'ถอนรายวิชาไม่สำเร็จ กรุณาลองใหม่'
+        'drop_error': 'ถอนรายวิชาไม่สำเร็จ กรุณาลองใหม่',
+
+        // Tabs & Timetable
+        'tab_courses': 'รายวิชาที่ลงทะเบียน',
+        'tab_timetable': 'ตารางเรียน',
+        'tab_exam': 'ตารางสอบ',
+        'day_time': 'วัน / เวลา',
+        'download_timetable': 'ดาวน์โหลดเป็น PNG',
+        'course_code': 'รหัสวิชา',
+        'course_name_label': 'ชื่อวิชา',
+        'midterm_exam': 'สอบกลางภาค',
+        'final_exam': 'สอบปลายภาค',
+        'total': 'รวม',
+        'no_professor': 'รอประกาศ',
+
+        // Grades
+        'grades': 'ผลการเรียน',
+        'grades_desc': 'ดูผลการเรียนและเกรดของคุณ',
+        'cumulative_gpax': 'เกรดเฉลี่ยสะสม (GPAX)',
+        'all_years': 'ทุกปีการศึกษา',
+        'academic_year': 'ปีการศึกษา',
+        'no_grades': 'ยังไม่มีผลการเรียน',
+        'grade_label': 'เกรด'
     }
 };
 

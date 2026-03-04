@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Search, BookPlus, Clock, MapPin, User, Hash } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Search, BookPlus, Clock, MapPin, User, Hash, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
@@ -112,6 +112,7 @@ export default function Enrollment() {
                         { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
                         { icon: BookOpen, label: t('my_courses'), path: '/my-courses' },
                         { icon: Users, label: t('enrollment'), active: true, path: '/enrollment' },
+                        { icon: Award, label: t('grades'), path: '/grades' },
                         { icon: Settings, label: t('settings'), path: '/settings' }
                     ].map((item, i) => (
                         <button key={i} onClick={() => item.path && navigate(item.path)}

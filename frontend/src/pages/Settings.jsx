@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, BookOpen, Users, Settings as SettingsIcon, LogOut, Camera } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Users, Settings as SettingsIcon, LogOut, Camera, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
@@ -149,8 +149,9 @@ export default function Settings() {
                 <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1 }}>
                     {[
                         { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
-                        { icon: BookOpen, label: t('my_courses') },
-                        { icon: Users, label: t('enrollment') },
+                        { icon: BookOpen, label: t('my_courses'), path: '/my-courses' },
+                        { icon: Users, label: t('enrollment'), path: '/enrollment' },
+                        { icon: Award, label: t('grades'), path: '/grades' },
                         { icon: SettingsIcon, label: t('settings'), active: true, path: '/settings' }
                     ].map((item, i) => (
                         <button key={i}

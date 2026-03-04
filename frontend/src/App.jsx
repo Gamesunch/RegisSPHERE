@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import Enrollment from './pages/Enrollment';
 import MyCourses from './pages/MyCourses';
+import Grades from './pages/Grades';
 import { LanguageProvider } from './context/LanguageContext';
 import './index.css';
 
@@ -20,6 +21,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/enrollment" element={<Enrollment />} />
           <Route path="/my-courses" element={<MyCourses />} />
+          <Route path="/grades" element={<Grades />} />
         </Routes>
       </Router>
     </LanguageProvider>

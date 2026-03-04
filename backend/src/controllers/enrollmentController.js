@@ -49,7 +49,7 @@ exports.enrollCourse = async (req, res) => {
 exports.getMyEnrollments = async (req, res) => {
     try {
         const result = await db.query(
-            `SELECT e.id as enrollment_id, e.status, c.*, u.last_name as prof_last 
+            `SELECT e.id as enrollment_id, e.status, e.grade, c.*, u.last_name as prof_last 
        FROM enrollments e
        JOIN courses c ON e.course_id = c.id
        LEFT JOIN users u ON c.professor_id = u.id
