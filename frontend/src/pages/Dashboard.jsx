@@ -97,8 +97,8 @@ export default function Dashboard() {
                 <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1 }}>
                     {[
                         { icon: LayoutDashboard, label: t('overview'), active: true, path: '/dashboard' },
-                        { icon: BookOpen, label: t('my_courses') },
-                        { icon: Users, label: t('enrollment') },
+                        { icon: BookOpen, label: t('my_courses'), path: '/my-courses' },
+                        { icon: Users, label: t('enrollment'), path: '/enrollment' },
                         { icon: Settings, label: t('settings'), path: '/settings' }
                     ].map((item, i) => (
                         <button key={i}

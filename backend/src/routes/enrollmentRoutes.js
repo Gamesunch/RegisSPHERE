@@ -5,5 +5,6 @@ const { authenticateToken, requireRole } = require('../middlewares/authMiddlewar
 
 router.post('/', authenticateToken, requireRole(['STUDENT']), enrollmentController.enrollCourse);
 router.get('/mine', authenticateToken, requireRole(['STUDENT']), enrollmentController.getMyEnrollments);
+router.delete('/:id', authenticateToken, requireRole(['STUDENT']), enrollmentController.dropCourse);
 
 module.exports = router;

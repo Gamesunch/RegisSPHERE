@@ -66,7 +66,31 @@ const translations = {
         'university': 'University',
         'major': 'Major',
         'year_of_study': 'Year of Study',
-        'save_changes': 'Save Changes'
+        'save_changes': 'Save Changes',
+
+        // Enrollment
+        'course_catalog': 'Course Catalog',
+        'browse_enroll_desc': 'Browse available courses and enroll.',
+        'search_courses': 'Search by course name or code...',
+        'credits': 'Credits',
+        'capacity': 'Capacity',
+        'enroll_btn': 'Enroll',
+        'enrolling': 'Enrolling...',
+        'enrolled_badge': 'Enrolled',
+        'enroll_success': 'Successfully enrolled in course!',
+        'enroll_error': 'Failed to enroll. Please try again.',
+        'no_courses_found': 'No courses found matching your search.',
+
+        // My Courses
+        'my_courses_desc': 'View and manage your enrolled courses.',
+        'total_credits': 'Total Credits',
+        'enrolled_courses_count': 'courses enrolled',
+        'no_enrolled_courses': 'You have not enrolled in any courses yet.',
+        'browse_courses': 'Browse Courses',
+        'drop_btn': 'Drop',
+        'drop_confirm': 'Are you sure you want to drop this course?',
+        'drop_success': 'Course dropped successfully.',
+        'drop_error': 'Failed to drop course. Please try again.'
     },
     th: {
         // App / Common
@@ -135,7 +159,31 @@ const translations = {
         'university': 'มหาวิทยาลัย',
         'major': 'สาขาวิชา',
         'year_of_study': 'ชั้นปีที่',
-        'save_changes': 'บันทึกการเปลี่ยนแปลง'
+        'save_changes': 'บันทึกการเปลี่ยนแปลง',
+
+        // Enrollment
+        'course_catalog': 'แคตตาล็อกรายวิชา',
+        'browse_enroll_desc': 'ค้นหารายวิชาและลงทะเบียนเรียน',
+        'search_courses': 'ค้นหาตามชื่อหรือรหัสวิชา...',
+        'credits': 'หน่วยกิต',
+        'capacity': 'จำนวนที่รับ',
+        'enroll_btn': 'ลงทะเบียน',
+        'enrolling': 'กำลังลงทะเบียน...',
+        'enrolled_badge': 'ลงทะเบียนแล้ว',
+        'enroll_success': 'ลงทะเบียนเรียนสำเร็จ!',
+        'enroll_error': 'ลงทะเบียนไม่สำเร็จ กรุณาลองใหม่',
+        'no_courses_found': 'ไม่พบรายวิชาที่ตรงกับการค้นหา',
+
+        // My Courses
+        'my_courses_desc': 'ดูและจัดการรายวิชาที่ลงทะเบียน',
+        'total_credits': 'หน่วยกิตรวม',
+        'enrolled_courses_count': 'รายวิชาที่ลงทะเบียน',
+        'no_enrolled_courses': 'คุณยังไม่ได้ลงทะเบียนเรียนรายวิชาใด',
+        'browse_courses': 'ค้นหารายวิชา',
+        'drop_btn': 'ถอน',
+        'drop_confirm': 'คุณแน่ใจหรือไม่ว่าต้องการถอนรายวิชานี้?',
+        'drop_success': 'ถอนรายวิชาสำเร็จ',
+        'drop_error': 'ถอนรายวิชาไม่สำเร็จ กรุณาลองใหม่'
     }
 };
 
