@@ -1,4 +1,4 @@
-# RegiSPHERE
+# RegisSPHERE
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -7,123 +7,150 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 
-This project is a dedicated portal designed to streamline the cooperative education management process for university students and administrators. It focuses on providing a clean interface and a reliable workflow for handling course enrollments and program tracking.
+RegisSPHERE is a modern, comprehensive student portal and university management system designed to streamline the academic experience. Built with a focus on usability and clarity, the application offers students a centralized platform to manage their profile, perform course enrollments, track their class schedules, and monitor their academic performance.
 
 ## Core Features
 
-- **Authentication**: A secure system built using JWT for user registration and login, ensuring data privacy and session management.
-- **Dashboard**: A centralized hub that provides students with a clear overview of their progress and easy access to different sections of the portal.
-- **Course Exploration**: Users can browse through the available COOP courses and view detailed information about each one.
-- **Enrollment Tracking**: A simple and effective way for students to manage their course enrollments and stay updated on their status.
-- **Modern Interface**: The frontend utilizes Framer Motion for subtle transitions and Lucide React for consistent iconography, all built on a responsive layout.
+- **Dynamic Localization**: Built-in, instant switching between English and Thai languages across the entire application interface.
+- **Secure Authentication**: Robust user registration and login flows utilizing JWT for session management and Bcrypt for password hashing. Includes specific Student and Admin roles.
+- **Student Dashboard**: A central hub providing an overview of the student's status with quick navigation to primary academic modules.
+- **Profile Management**: A dedicated settings module allowing users to upload custom profile pictures safely and edit biographical details.
+- **Course Enrollment**: An interactive catalog allowing students to search for available courses, view detailed metrics (credits, schedules, capacity, professor), and manage live enrollments or drops.
+- **Academic Scheduling**: A detailed "My Courses" interface segmented into logical tabs:
+    - **Enrolled Courses**: Overview of current enrollments.
+    - **Study Timetable**: An automatically generated, visual grid calendar of the student's week, complete with a functionality to export the timetable as a PNG image.
+    - **Exam Schedule**: Clear breakdowns of midterm and final exam dates for enrolled subjects.
+- **Grades and Progress Tracking**: A dedicated module to view academic results, offering sorting by Academic Year, visual grade badges, and automatic calculations for Semester GPA and Cumulative GPAX.
+- **Modern Minimalist Interface**: Clean UI built on a unified color system, leveraging Framer Motion for sophisticated animations and glassmorphism principles.
 
 ## Technology Stack
 
-The application is built using a modern full-stack approach:
+The application infrastructure utilizes a modern full-stack web architecture:
 
-| Layer | Technologies |
+| Component | Technologies Utilized |
 | :--- | :--- |
-| **Frontend** | React 19, Vite, React Router, Framer Motion, Lucide React, React Hook Form |
-| **Backend** | Node.js, Express 5, JWT, Bcrypt for security |
-| **Database** | PostgreSQL hosted on Supabase |
-| **Styling** | Clean, vanilla CSS using modern properties |
+| **Frontend Runtime** | React 19, Vite |
+| **Frontend Libraries** | React Router DOM for routing, Framer Motion for animation, Lucide React for iconography, html2canvas for image export |
+| **Backend Runtime** | Node.js, Express 5 |
+| **Backend Modules** | JSON Web Tokens (auth), Bcrypt (encryption), Multer (file uploads), pg (database connectivity) |
+| **Database Structure** | PostgreSQL hosted via Supabase |
+| **Styling Protocol** | Vanilla CSS using global custom variable properties |
 
-## System Flow
+## System Flow Architecture
 
 ```mermaid
 graph TD
-    User((User)) <-->|React Frontend| Vite[Vite Development Server]
-    Vite <-->|API Calls| Express[Express Backend]
-    Express <-->|Auth / Data| PG[(PostgreSQL / Supabase)]
-    Express ---|JWT| Middleware[Auth Middleware]
+    User((Client Request)) <-->|React GUI| Vite[Vite Build/Dev Server]
+    Vite <-->|RESTful API | Express[Express Node.js Server]
+    Express <-->|Database Queries| PG[(PostgreSQL / Supabase)]
+    Express ---|JWT Verification| Middleware[Auth / Authorization Middleware]
+    Express ---|File System| Multer[Local File Uploads / Profile Pictures]
 ```
 
-## Folder Organization
+## Project Structure
 
-The repository is split into two main sections: the frontend client and the backend server.
+The repository is modularly split into the frontend client and the backend server.
 
 ```text
 COOP/
-├── backend/                # Server-side logic and API
+├── backend/                # Node.js + Express backend server
 │   ├── src/
-│   │   ├── config/         # Database and environment configurations
-│   │   ├── controllers/    # Shared logic for handling requests
-│   │   ├── middlewares/    # Authentication and security layers
-│   │   ├── routes/         # Definitions of API endpoints
-│   │   └── app.js          # Main application entry point
-│   └── .env                # Local environment variables
-├── frontend/               # Client-side React application
+│   │   ├── config/         # Database and connection settings
+│   │   ├── controllers/    # API business logic
+│   │   ├── middlewares/    # Authentication interceptors
+│   │   ├── routes/         # API endpoint definitions
+│   │   └── app.js          # Core Express application setup
+│   ├── .env                # Local environment variables (ignored in Git)
+│   ├── check_schema.js     # Database initialization script
+│   ├── migrate_grades.js   # Grades migration script
+│   └── seed_courses.js     # Sample data generation script
+├── frontend/               # React client application
 │   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Individual page views
-│   │   ├── App.jsx         # Main routing and layout
-│   │   └── main.jsx        # Application bootstrap
-│   └── vite.config.js      # Build and development settings
-└── README.md               # Documentation
+│   │   ├── components/     # Reusable React components (e.g., Form controls)
+│   │   ├── context/        # Global React Contexts (e.g., Language translations)
+│   │   ├── pages/          # Full-page view components (Dashboard, Grades, etc.)
+│   │   ├── translations.js # Centralized EN/TH translation dictionary
+│   │   ├── App.jsx         # Primary router and application structure
+│   │   └── index.css       # Global stylesheet and CSS variables
+│   └── vite.config.js      # Build configurations for Vite
+└── README.md               # Primary project documentation
 ```
 
 ## Setup and Installation
 
 ### Prerequisites
-Before starting, ensure you have the following installed on your machine:
-- Node.js (version 18 or higher recommended)
-- npm (distributed with Node.js)
+Ensure your local development environment has the following dependencies:
+- Node.js (Version 18.x or higher)
+- npm (Node Package Manager)
 
 ### 1. Repository Setup
-First, clone the project and navigate into the root directory:
+Clone the repository and access the root directory:
 ```bash
 git clone https://github.com/your-username/university-coop.git
 cd university-coop
 ```
 
-### 2. Backend Configuration
-Navigate to the backend folder and install the necessary dependencies:
+### 2. Backend Initialization
+Access the backend directory, install packages, and prepare the environment:
 ```bash
 cd backend
 npm install
 ```
-Create a `.env` file in the `backend/` directory with the following variables:
+Create a `.env` file within the `backend/` directory and apply the following variables:
 ```env
 PORT=5000
 DATABASE_URL=your_postgresql_connection_string
-JWT_SECRET=your_secure_random_string
+JWT_SECRET=your_secure_randomjwt_string
 ```
 
-### 3. Frontend Configuration
-Go back to the root and then into the frontend folder to install its dependencies:
+Run database migrations to initialize tables and sample data (ensure `DATABASE_URL` is active):
+```bash
+node check_schema.js
+node seed_courses.js
+node migrate_exam.js
+node migrate_grades.js
+```
+
+### 3. Frontend Initialization
+Return to the root directory, transition to the frontend directory, and install packages:
 ```bash
 cd ../frontend
 npm install
 ```
 
-### 4. Running the Project
-You will need two terminal windows to run the application locally.
+### 4. Running the Development Environments
+The architecture requires both the server and client running concurrently. Utilize two separate terminal instances.
 
-**Backend Server:**
+**Initialize Backend Server:**
 ```bash
 cd backend
-npm run dev # or node src/app.js
+npm run dev
 ```
 
-**Frontend Client:**
+**Initialize Frontend Client:**
 ```bash
 cd frontend
 npm run dev
 ```
 
-## API Summary
+The frontend application will be served at `http://localhost:5173/`, seamlessly proxying backend requests to `http://localhost:5000/`.
 
-The backend exposes several endpoints for data management:
+## Key REST API Endpoints
 
-| Method | Endpoint | Purpose |
-| :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Create a new user account |
-| `POST` | `/api/auth/login` | Log in and receive an authentication token |
-| `GET` | `/api/courses` | Retrieve a list of available courses |
-| `GET` | `/api/enrollments` | View enrollments for the current user |
+The modular backend structure exposes the following capabilities:
 
-## Contributing
-If you're interested in contributing, please feel free to submit a pull request or open an issue for discussion.
+| Domain | Method | Endpoint | Description |
+| :--- | :--- | :--- | :--- |
+| **Authentication** | `POST` | `/api/auth/register` | Account creation |
+| **Authentication** | `POST` | `/api/auth/login` | Session initiation |
+| **Profile** | `GET` | `/api/profile` | Retrieve user details |
+| **Profile** | `PUT` | `/api/profile` | Update user context (Bio) |
+| **Profile** | `POST` | `/api/profile/picture` | Handle image buffer uploads via Multer |
+| **Courses** | `GET` | `/api/courses` | Retrieve available course catalog |
+| **Enrollment** | `POST` | `/api/enrollments` | Process new student enrollment |
+| **Enrollment** | `GET` | `/api/enrollments/mine` | Retrieve active student enrollments |
+| **Enrollment** | `DELETE` | `/api/enrollments/:id` | Drop specified course |
+| **Grades** | `GET` | `/api/grades/mine` | Aggregated GPA, academic year, and grading data |
 
 ## License
-This project is released under the ISC License.
+This software project is restricted under the ISC License.
