@@ -4,6 +4,7 @@ import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Search, BookPlus, C
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import Sidebar from '../components/Sidebar';
 
 const API_BASE = 'http://localhost:5000';
 
@@ -41,6 +42,10 @@ export default function Enrollment() {
             if (phaseRes.ok) {
                 const phaseData = await phaseRes.json();
                 setPhase(phaseData.phase);
+                if (phaseData.phase === 'CLOSED') {
+                    navigate('/dashboard');
+                    return;
+                }
             }
 
             // Fetch all courses
@@ -107,46 +112,8 @@ export default function Enrollment() {
 
     return (
         <div style={{ display: 'flex', height: '100vh', background: 'var(--color-bg-dark)', overflow: 'hidden' }}>
-            {/* Sidebar */}
-            <motion.aside initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5 }}
-                className="glass-panel" style={{ width: '280px', height: '100vh', padding: '2.5rem 1rem', display: 'flex', flexDirection: 'column', borderRadius: '0 24px 24px 0', borderLeft: 'none', borderTop: 'none', borderBottom: 'none' }}>
-                <div style={{ padding: '0 1rem', marginBottom: '3rem', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-                    <h2 style={{ fontSize: '1.8rem', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>Regis</span>
-                        <span style={{ fontWeight: 800, letterSpacing: '1px', color: 'white', background: 'var(--color-primary)', padding: '2px 8px', borderRadius: '8px', fontSize: '1.4rem' }}>SPHERE</span>
-                    </h2>
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginTop: '0.2rem' }}>{t('student_portal')}</p>
-                </div>
-                <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1 }}>
-                    {[
-                        { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
-                        { icon: BookOpen, label: t('my_courses'), path: '/my-courses' },
-                        { icon: Users, label: t('enrollment'), active: true, path: '/enrollment' },
-                        { icon: Award, label: t('grades'), path: '/grades' },
-                        { icon: Settings, label: t('settings'), path: '/settings' }
-                    ].map((item, i) => (
-                        <button key={i} onClick={() => item.path && navigate(item.path)}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.2rem', width: '100%', border: 'none',
-                                background: item.active ? 'linear-gradient(90deg, rgba(242, 159, 5, 0.15), transparent)' : 'transparent',
-                                color: item.active ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                                borderLeft: item.active ? '4px solid var(--color-primary)' : '4px solid transparent',
-                                borderRadius: '0 12px 12px 0', cursor: 'pointer', fontSize: '1rem', fontWeight: 500, fontFamily: 'var(--font-main)', transition: 'all 0.3s ease'
-                            }}
-                            onMouseEnter={(e) => { if (!item.active) e.currentTarget.style.color = 'var(--color-primary)'; }}
-                            onMouseLeave={(e) => { if (!item.active) e.currentTarget.style.color = 'var(--color-text-muted)'; }}
-                        >
-                            <item.icon size={22} /> {item.label}
-                        </button>
-                    ))}
-                </nav>
-                <div style={{ marginTop: 'auto', padding: '0 1rem' }}>
-                    <motion.button whileHover={{ scale: 1.02, backgroundColor: 'rgba(244, 63, 94, 0.2)' }} whileTap={{ scale: 0.98 }} onClick={handleLogout}
-                        className="btn glass-panel" style={{ width: '100%', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '1rem' }}>
-                        <LogOut size={18} /> {t('logout')}
-                    </motion.button>
-                </div>
-            </motion.aside>
+            {/* Sidebar unified component */}
+            <Sidebar activePath="/enrollment" />
 
             {/* Main Content */}
             <main style={{ flex: 1, padding: '2rem 3rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>

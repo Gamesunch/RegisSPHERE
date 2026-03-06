@@ -4,6 +4,7 @@ import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Clock, MapPin, User
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import Sidebar from '../components/Sidebar';
 import html2canvas from 'html2canvas';
 
 const API_BASE = 'http://localhost:5000';
@@ -129,46 +130,8 @@ export default function MyCourses() {
 
     return (
         <div style={{ display: 'flex', height: '100vh', background: 'var(--color-bg-dark)', overflow: 'hidden' }}>
-            {/* Sidebar */}
-            <motion.aside initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5 }}
-                className="glass-panel" style={{ width: '280px', height: '100vh', padding: '2.5rem 1rem', display: 'flex', flexDirection: 'column', borderRadius: '0 24px 24px 0', borderLeft: 'none', borderTop: 'none', borderBottom: 'none' }}>
-                <div style={{ padding: '0 1rem', marginBottom: '3rem', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-                    <h2 style={{ fontSize: '1.8rem', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>Regis</span>
-                        <span style={{ fontWeight: 800, letterSpacing: '1px', color: 'white', background: 'var(--color-primary)', padding: '2px 8px', borderRadius: '8px', fontSize: '1.4rem' }}>SPHERE</span>
-                    </h2>
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginTop: '0.2rem' }}>{t('student_portal')}</p>
-                </div>
-                <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1 }}>
-                    {[
-                        { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
-                        { icon: BookOpen, label: t('my_courses'), active: true, path: '/my-courses' },
-                        { icon: Users, label: t('enrollment'), path: '/enrollment' },
-                        { icon: Award, label: t('grades'), path: '/grades' },
-                        { icon: Settings, label: t('settings'), path: '/settings' }
-                    ].map((item, i) => (
-                        <button key={i} onClick={() => item.path && navigate(item.path)}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.2rem', width: '100%', border: 'none',
-                                background: item.active ? 'linear-gradient(90deg, rgba(242, 159, 5, 0.15), transparent)' : 'transparent',
-                                color: item.active ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                                borderLeft: item.active ? '4px solid var(--color-primary)' : '4px solid transparent',
-                                borderRadius: '0 12px 12px 0', cursor: 'pointer', fontSize: '1rem', fontWeight: 500, fontFamily: 'var(--font-main)', transition: 'all 0.3s ease'
-                            }}
-                            onMouseEnter={(e) => { if (!item.active) e.currentTarget.style.color = 'var(--color-primary)'; }}
-                            onMouseLeave={(e) => { if (!item.active) e.currentTarget.style.color = 'var(--color-text-muted)'; }}
-                        >
-                            <item.icon size={22} /> {item.label}
-                        </button>
-                    ))}
-                </nav>
-                <div style={{ marginTop: 'auto', padding: '0 1rem' }}>
-                    <motion.button whileHover={{ scale: 1.02, backgroundColor: 'rgba(244, 63, 94, 0.2)' }} whileTap={{ scale: 0.98 }} onClick={handleLogout}
-                        className="btn glass-panel" style={{ width: '100%', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '1rem' }}>
-                        <LogOut size={18} /> {t('logout')}
-                    </motion.button>
-                </div>
-            </motion.aside>
+            {/* Sidebar unified component */}
+            <Sidebar activePath="/my-courses" />
 
             {/* Main Content */}
             <main style={{ flex: 1, padding: '2rem 3rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
@@ -404,35 +367,37 @@ export default function MyCourses() {
                 )}
             </main>
 
-            {/* Confirmation Modal */}
-            {confirmDropModalId && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-                }}>
-                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel"
-                        style={{ padding: '2rem', borderRadius: '16px', maxWidth: '400px', width: '90%', textAlign: 'center' }}>
-                        <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
-                            <Trash2 size={30} color="#ef4444" />
-                        </div>
-                        <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--color-text)' }}>{t('drop_confirm_title') || 'Confirm Drop'}</h3>
-                        <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem', lineHeight: 1.5 }}>
-                            {t('drop_confirm_desc') || 'Are you sure you want to drop this course? This action cannot be undone.'}
-                        </p>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button className="btn" onClick={() => setConfirmDropModalId(null)}
-                                style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
-                                {t('cancel')}
-                            </button>
-                            <button className="btn" onClick={executeDrop}
-                                style={{ flex: 1, padding: '0.8rem', background: '#ef4444', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(239, 68, 68, 0.3)' }}>
-                                {t('confirm_drop') || 'Drop Course'}
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+            {confirmDropModalId && (() => {
+                const courseToDrop = enrollments.find(e => e.enrollment_id === confirmDropModalId);
+                return (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                    }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel"
+                            style={{ padding: '2rem', borderRadius: '16px', maxWidth: '400px', width: '90%', textAlign: 'center' }}>
+                            <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+                                <Trash2 size={30} color="#ef4444" />
+                            </div>
+                            <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--color-text)' }}>{t('Warning!') || 'Confirm Drop'}</h3>
+                            <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem', lineHeight: 1.5 }}>
+                                Are you sure you want to drop <strong>{courseToDrop?.name}</strong>? This action cannot be undone.
+                            </p>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button className="btn" onClick={() => setConfirmDropModalId(null)}
+                                    style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
+                                    {t('cancel')}
+                                </button>
+                                <button className="btn" onClick={executeDrop}
+                                    style={{ flex: 1, padding: '0.8rem', background: '#ef4444', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(239, 68, 68, 0.3)' }}>
+                                    {t('confirm_drop') || 'Drop Course'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                );
+            })()}
         </div>
     );
 }
