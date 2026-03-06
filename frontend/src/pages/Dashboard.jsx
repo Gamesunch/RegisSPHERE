@@ -249,15 +249,22 @@ export default function Dashboard() {
                                         value={adminPhase}
                                         onChange={async (e) => {
                                             const newPhase = e.target.value;
+
+                                            // Add confirmation for phase change
+                                            if (!window.confirm(`Are you sure you want to change the enrollment phase to ${newPhase}? This might trigger automatic waitlist enrollments.`)) {
+                                                e.target.value = adminPhase; // Revert selection
+                                                return;
+                                            }
+
                                             setAdminPhase(newPhase);
                                             await fetch('http://localhost:5000/api/admin/phase', {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                                                 body: JSON.stringify({ phase: newPhase })
                                             });
-                                            // Refresh demand data
-                                            const demandRes = await fetch('http://localhost:5000/api/admin/demand', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
-                                            if (demandRes.ok) setDemandData(await demandRes.json());
+
+                                            // Force a full reload to refresh all components cleanly
+                                            window.location.reload();
                                         }}
                                         style={{ padding: '0.6rem 1rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', cursor: 'pointer', fontWeight: 600 }}
                                     >
@@ -305,8 +312,19 @@ export default function Dashboard() {
                                                                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                                                                         body: JSON.stringify({ capacity: parseInt(newCap) })
                                                                     });
+
+                                                                    // Refresh demand data for the table
                                                                     const demandRes = await fetch('http://localhost:5000/api/admin/demand', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
                                                                     if (demandRes.ok) setDemandData(await demandRes.json());
+
+                                                                    // Also refresh the user's enrollments to update the waitlist count instantly
+                                                                    const enrollRes = await fetch('http://localhost:5000/api/enrollments/mine', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                                                                    if (enrollRes.ok) {
+                                                                        const myEnrollments = await enrollRes.json();
+                                                                        let waitlistedCount = 0;
+                                                                        myEnrollments.forEach(c => { if (c.status === 'WAITLISTED') waitlistedCount++; });
+                                                                        setStats(prev => ({ ...prev, pending: waitlistedCount }));
+                                                                    }
                                                                 }
                                                             }}
                                                             style={{ padding: '0.4rem 0.8rem', background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}>

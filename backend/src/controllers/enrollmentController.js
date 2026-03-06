@@ -85,18 +85,43 @@ exports.dropCourse = async (req, res) => {
         const { id } = req.params;
         const student_id = req.user.id;
 
-        // Only allow the student who enrolled to drop
-        const result = await db.query(
-            'DELETE FROM enrollments WHERE id = $1 AND student_id = $2 RETURNING *',
+        await db.query('BEGIN');
+
+        // 1. Get the enrollment details before deleting
+        const enrollmentRes = await db.query(
+            'SELECT course_id, status FROM enrollments WHERE id = $1 AND student_id = $2',
             [id, student_id]
         );
 
-        if (result.rows.length === 0) {
+        if (enrollmentRes.rows.length === 0) {
+            await db.query('ROLLBACK');
             return res.status(404).json({ error: 'Enrollment not found or not authorized' });
         }
 
+        const { course_id, status } = enrollmentRes.rows[0];
+
+        // 2. Delete the enrollment
+        await db.query('DELETE FROM enrollments WHERE id = $1', [id]);
+
+        // 3. If the dropped course was 'ENROLLED', promote the next waitlisted student
+        if (status === 'ENROLLED') {
+            const nextWaitlisted = await db.query(
+                "SELECT id FROM enrollments WHERE course_id = $1 AND status = 'WAITLISTED' ORDER BY enrolled_at ASC LIMIT 1",
+                [course_id]
+            );
+
+            if (nextWaitlisted.rows.length > 0) {
+                await db.query(
+                    "UPDATE enrollments SET status = 'ENROLLED' WHERE id = $1",
+                    [nextWaitlisted.rows[0].id]
+                );
+            }
+        }
+
+        await db.query('COMMIT');
         res.json({ message: 'Course dropped successfully' });
     } catch (error) {
+        await db.query('ROLLBACK');
         console.error(error);
         res.status(500).json({ error: 'Server error dropping course' });
     }

@@ -8,7 +8,6 @@ import LanguageSwitcher from '../components/LanguageSwitcher';
 export default function Login() {
     const navigate = useNavigate();
     const { t } = useLanguage();
-    const [role, setRole] = useState('STUDENT');
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -61,29 +60,7 @@ export default function Login() {
                     <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('login_subtitle')}</p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem' }}>
-                    {['STUDENT', 'PROFESSOR'].map(r => (
-                        <button
-                            key={r}
-                            onClick={(e) => { e.preventDefault(); setRole(r); }}
-                            style={{
-                                flex: 1,
-                                padding: '0.8rem',
-                                borderRadius: '10px',
-                                border: `1px solid ${role === r ? 'var(--color-secondary)' : 'var(--glass-border)'}`,
-                                background: role === r ? 'var(--color-secondary)' : 'var(--color-bg-light)',
-                                color: role === r ? 'white' : 'var(--color-text)',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s',
-                                fontFamily: 'var(--font-main)',
-                                fontWeight: role === r ? 600 : 500,
-                                boxShadow: role === r ? '0 4px 12px rgba(46, 167, 242, 0.25)' : 'inset 0 2px 4px rgba(0,0,0,0.02)'
-                            }}
-                        >
-                            {t(r.toLowerCase())}
-                        </button>
-                    ))}
-                </div>
+
 
                 <form onSubmit={handleLogin}>
                     {errorMsg && (
