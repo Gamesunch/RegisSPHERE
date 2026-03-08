@@ -11,6 +11,7 @@ export default function CourseManagement() {
     const { t } = useLanguage();
     const [user, setUser] = useState(null);
     const [courses, setCourses] = useState([]);
+    const [professorsList, setProfessorsList] = useState([]);
 
     // Add Course Modal State
     const [showAddModal, setShowAddModal] = useState(false);
@@ -29,8 +30,7 @@ export default function CourseManagement() {
         name: '',
         credits: 3,
         capacity: 30,
-        prof_first: '',
-        prof_last: '',
+        professor_ids: [],
         room: '',
         description: ''
     });
@@ -67,6 +67,14 @@ export default function CourseManagement() {
                     setCourses(await courseRes.json());
                 }
 
+                // Fetch all professors
+                const profsRes = await fetch('http://localhost:5000/api/users/professors', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (profsRes.ok) {
+                    setProfessorsList(await profsRes.json());
+                }
+
             } catch (err) {
                 console.error("CourseManagement mount error", err);
                 navigate('/login');
@@ -99,7 +107,7 @@ export default function CourseManagement() {
                 setShowAddModal(false);
                 setNewCourse({
                     code: '', name: '', credits: 3, capacity: 30,
-                    prof_first: '', prof_last: '',
+                    professor_ids: [],
                     room: '', description: ''
                 });
                 setScheduleDay('Mon');
@@ -121,8 +129,7 @@ export default function CourseManagement() {
             name: course.name,
             credits: course.credits,
             capacity: course.capacity,
-            prof_first: course.prof_first,
-            prof_last: course.prof_last,
+            professor_ids: course.professors ? course.professors.map(p => p.id) : [],
             room: course.room || '',
             description: course.description || ''
         });
@@ -301,7 +308,9 @@ export default function CourseManagement() {
                                         <td style={{ padding: '1rem', fontWeight: 700, color: 'var(--color-primary)' }}>{course.code}</td>
                                         <td style={{ padding: '1rem', fontWeight: 500 }}>{course.name}</td>
                                         <td style={{ padding: '1rem', textAlign: 'center' }}>{course.credits}</td>
-                                        <td style={{ padding: '1rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>{course.prof_first} {course.prof_last}</td>
+                                        <td style={{ padding: '1rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                                            {course.professors && course.professors.length > 0 ? course.professors.map(p => `${p.first_name} ${p.last_name}`).join(', ') : 'TBA'}
+                                        </td>
                                         <td style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem' }}>{course.schedule_time || 'TBA'}</td>
                                         <td style={{ padding: '1rem', textAlign: 'center' }}>{course.room || 'TBA'}</td>
                                         <td style={{ padding: '1rem', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
@@ -339,6 +348,29 @@ export default function CourseManagement() {
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <input type="number" placeholder="Capacity" required value={newCourse.capacity} onChange={(e) => setNewCourse({ ...newCourse, capacity: parseInt(e.target.value) })} style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)' }} />
                                 <input type="text" placeholder="Room (e.g. 101)" value={newCourse.room} onChange={(e) => setNewCourse({ ...newCourse, room: e.target.value })} style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)' }} />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text)', fontSize: '0.95rem' }}>Assign Professors <span style={{ fontWeight: 'normal', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>(Optional)</span></label>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', maxHeight: '120px', overflowY: 'auto', padding: '0.8rem', background: 'var(--color-bg-light)', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                    {professorsList.map(prof => (
+                                        <label key={prof.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--color-text)' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={newCourse.professor_ids.includes(prof.id)}
+                                                onChange={(e) => {
+                                                    const updated = e.target.checked
+                                                        ? [...newCourse.professor_ids, prof.id]
+                                                        : newCourse.professor_ids.filter(id => id !== prof.id);
+                                                    setNewCourse({ ...newCourse, professor_ids: updated });
+                                                }}
+                                                style={{ accentColor: 'var(--color-primary)' }}
+                                            />
+                                            {prof.first_name} {prof.last_name}
+                                        </label>
+                                    ))}
+                                    {professorsList.length === 0 && <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>No professors found.</span>}
+                                </div>
                             </div>
 
                             {/* New Schedule Selector */}
@@ -380,6 +412,29 @@ export default function CourseManagement() {
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <input type="number" placeholder="Capacity" required value={newCourse.capacity} onChange={(e) => setNewCourse({ ...newCourse, capacity: parseInt(e.target.value) })} style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)' }} />
                                 <input type="text" placeholder="Room (e.g. 101)" value={newCourse.room} onChange={(e) => setNewCourse({ ...newCourse, room: e.target.value })} style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)' }} />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text)', fontSize: '0.95rem' }}>Assign Professors <span style={{ fontWeight: 'normal', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>(Optional)</span></label>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', maxHeight: '120px', overflowY: 'auto', padding: '0.8rem', background: 'var(--color-bg-light)', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                    {professorsList.map(prof => (
+                                        <label key={prof.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--color-text)' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={newCourse.professor_ids.includes(prof.id)}
+                                                onChange={(e) => {
+                                                    const updated = e.target.checked
+                                                        ? [...newCourse.professor_ids, prof.id]
+                                                        : newCourse.professor_ids.filter(id => id !== prof.id);
+                                                    setNewCourse({ ...newCourse, professor_ids: updated });
+                                                }}
+                                                style={{ accentColor: 'var(--color-primary)' }}
+                                            />
+                                            {prof.first_name} {prof.last_name}
+                                        </label>
+                                    ))}
+                                    {professorsList.length === 0 && <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>No professors found.</span>}
+                                </div>
                             </div>
 
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>

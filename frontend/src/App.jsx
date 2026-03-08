@@ -8,6 +8,9 @@ import MyCourses from './pages/MyCourses';
 import Grades from './pages/Grades';
 import CourseManagement from './pages/CourseManagement';
 import StudentManagement from './pages/StudentManagement';
+import ProfessorDashboard from './pages/ProfessorDashboard';
+import ProfessorCourses from './pages/ProfessorCourses';
+import ProfessorClassDetails from './pages/ProfessorClassDetails';
 import { LanguageProvider } from './context/LanguageContext';
 import './index.css';
 
@@ -26,6 +29,9 @@ function App() {
           <Route path="/grades" element={<Grades />} />
           <Route path="/admin/courses" element={<CourseManagement />} />
           <Route path="/admin/students" element={<StudentManagement />} />
+          <Route path="/professor/dashboard" element={<ProfessorDashboard />} />
+          <Route path="/professor/courses" element={<ProfessorCourses />} />
+          <Route path="/professor/courses/:courseId" element={<ProfessorClassDetails />} />
         </Routes>
       </Router>
     </LanguageProvider>

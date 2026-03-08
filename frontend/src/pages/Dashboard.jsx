@@ -34,9 +34,17 @@ export default function Dashboard() {
                 if (profileRes.ok) {
                     currentUser = await profileRes.json();
                     setUser(currentUser);
+                    if (currentUser.role === 'PROFESSOR') {
+                        navigate('/professor/dashboard');
+                        return;
+                    }
                 } else {
                     currentUser = JSON.parse(localStorage.getItem('user'));
                     setUser(currentUser);
+                    if (currentUser?.role === 'PROFESSOR') {
+                        navigate('/professor/dashboard');
+                        return;
+                    }
                 }
 
                 if (currentUser && currentUser.role === 'STUDENT') {
@@ -77,7 +85,7 @@ export default function Dashboard() {
                                         sortTime: match ? match[1] : '99:99',
                                         name: course.name,
                                         room: course.room || 'TBA',
-                                        prof: course.prof_last ? `Prof. ${course.prof_last}` : 'TBA',
+                                        prof: course.professors && course.professors.length > 0 ? `Prof. ${course.professors.map(p => p.last_name).join(', ')}` : 'TBA',
                                         color: '#3b82f6' // Default color
                                     });
                                 }

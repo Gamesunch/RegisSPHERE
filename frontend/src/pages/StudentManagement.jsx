@@ -75,8 +75,8 @@ export default function StudentManagement() {
         // Combine into one string
         const csvString = [headers.join(','), ...csvRows].join('\n');
 
-        // Trigger download
-        const blob = new Blob([csvString], { type: 'text/csv' });
+        // Trigger download with UTF-8 BOM for Excel support
+        const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.setAttribute('hidden', '');

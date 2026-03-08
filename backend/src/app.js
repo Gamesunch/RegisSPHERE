@@ -9,6 +9,8 @@ const enrollmentRoutes = require('./routes/enrollmentRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const gradeRoutes = require('./routes/gradeRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -29,6 +31,8 @@ app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/grades', gradeRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/announcements', announcementRoutes);
+app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 5000;
 

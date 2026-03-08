@@ -58,6 +58,9 @@ export default function MyCourses() {
     const [user, setUser] = useState(null);
     const [activeTab, setActiveTab] = useState('courses');
     const [confirmDropModalId, setConfirmDropModalId] = useState(null);
+    const [selectedCourseForAnnouncements, setSelectedCourseForAnnouncements] = useState(null);
+    const [courseAnnouncements, setCourseAnnouncements] = useState([]);
+    const [loadingAnnouncements, setLoadingAnnouncements] = useState(false);
     const timetableRef = useRef(null);
 
     useEffect(() => {
@@ -100,6 +103,25 @@ export default function MyCourses() {
             link.href = canvas.toDataURL('image/png');
             link.click();
         } catch (err) { console.error('Download error:', err); }
+    };
+
+    const handleViewAnnouncements = async (course) => {
+        setSelectedCourseForAnnouncements(course);
+        setLoadingAnnouncements(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/announcements/course/${course.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setCourseAnnouncements(data);
+            }
+        } catch (error) {
+            console.error('Error fetching announcements:', error);
+        } finally {
+            setLoadingAnnouncements(false);
+        }
     };
 
     const handleLogout = () => { localStorage.removeItem('token'); localStorage.removeItem('user'); navigate('/login'); };
@@ -211,7 +233,7 @@ export default function MyCourses() {
                                             <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.83rem', color: 'var(--color-text-muted)', flexWrap: 'wrap' }}>
                                                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Clock size={13} /> {course.schedule_time}</span>
                                                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><MapPin size={13} /> {course.room}</span>
-                                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><User size={13} /> {course.prof_last ? `Prof. ${course.prof_last}` : t('no_professor')}</span>
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><User size={13} /> {course.professors && course.professors.length > 0 ? `Prof. ${course.professors.map(p => p.last_name).join(', ')}` : t('no_professor')}</span>
                                             </div>
                                         </div>
                                         {/* Status Badge */}
@@ -235,7 +257,12 @@ export default function MyCourses() {
                                                 {t('grade_label')}: {course.grade}
                                             </span>
                                         )}
-                                        <span style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '0.95rem', whiteSpace: 'nowrap', background: 'rgba(242, 159, 5, 0.08)', padding: '6px 14px', borderRadius: '8px', marginRight: '2rem' }}>{course.credits} {t('credits')}</span>
+                                        <span style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '0.95rem', whiteSpace: 'nowrap', background: 'rgba(242, 159, 5, 0.08)', padding: '6px 14px', borderRadius: '8px', marginRight: '1rem' }}>{course.credits} {t('credits')}</span>
+                                        <motion.button whileHover={{ scale: 1.05, backgroundColor: 'rgba(59, 130, 246, 0.2)' }} whileTap={{ scale: 0.95 }}
+                                            onClick={() => handleViewAnnouncements(course)}
+                                            style={{ padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid rgba(59, 130, 246, 0.4)', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500, fontSize: '0.85rem', fontFamily: 'var(--font-main)' }}>
+                                            <FileText size={15} /> Announcements
+                                        </motion.button>
                                         <motion.button whileHover={{ scale: 1.05, backgroundColor: 'rgba(239, 68, 68, 0.2)' }} whileTap={{ scale: 0.95 }}
                                             onClick={() => setConfirmDropModalId(course.enrollment_id)} disabled={droppingId === course.enrollment_id}
                                             style={{ padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid rgba(239, 68, 68, 0.2)', background: 'rgba(239, 68, 68, 0.08)', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500, fontSize: '0.85rem', fontFamily: 'var(--font-main)', marginLeft: '1rem', whiteSpace: 'nowrap' }}>
@@ -398,6 +425,43 @@ export default function MyCourses() {
                     </div>
                 );
             })()}
+
+            {selectedCourseForAnnouncements && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }}>
+                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel"
+                        style={{ padding: '2rem', borderRadius: '16px', maxWidth: '600px', width: '90%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-text)' }}>
+                                Announcements - {selectedCourseForAnnouncements.code}
+                            </h3>
+                            <button className="btn" onClick={() => setSelectedCourseForAnnouncements(null)} style={{ background: 'transparent', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--color-text-muted)' }}>&times;</button>
+                        </div>
+                        <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
+                            {loadingAnnouncements ? (
+                                <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Loading announcements...</p>
+                            ) : courseAnnouncements.length === 0 ? (
+                                <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>No announcements posted yet.</p>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {courseAnnouncements.map(ann => (
+                                        <div key={ann.id} style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--color-primary)' }}>{ann.title}</h4>
+                                            <p style={{ color: 'var(--color-text)', fontSize: '0.95rem', marginBottom: '0.8rem', lineHeight: 1.5 }}>{ann.content}</p>
+                                            <small style={{ color: 'var(--color-text-muted)', opacity: 0.7 }}>
+                                                {new Date(ann.created_at).toLocaleDateString()} by {ann.prof_first} {ann.prof_last}
+                                            </small>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 }

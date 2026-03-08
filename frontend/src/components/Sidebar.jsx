@@ -41,18 +41,23 @@ export default function Sidebar({ activePath }) {
     };
 
     let navItems = [];
-    if (userRole === 'ADMIN' || userRole === 'PROFESSOR') {
+    if (userRole === 'ADMIN') {
         navItems = [
             { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
             { icon: BookOpen, label: 'Manage Courses', path: '/admin/courses' },
             { icon: Users, label: 'Student Users', path: '/admin/students' },
             { icon: Settings, label: t('settings'), path: '/settings' }
         ];
+    } else if (userRole === 'PROFESSOR') {
+        navItems = [
+            { icon: LayoutDashboard, label: t('overview'), path: '/professor/dashboard' },
+            { icon: BookOpen, label: 'My Classes', path: '/professor/courses' },
+            { icon: Settings, label: t('settings'), path: '/settings' }
+        ];
     } else {
         navItems = [
             { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
             { icon: BookOpen, label: t('my_courses'), path: '/my-courses' },
-            // Conditionally add Enrollment
             ...(phase !== 'CLOSED' ? [{ icon: Users, label: t('enrollment'), path: '/enrollment' }] : []),
             { icon: Award, label: t('grades'), path: '/grades' },
             { icon: Settings, label: t('settings'), path: '/settings' }

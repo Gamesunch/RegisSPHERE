@@ -33,7 +33,11 @@ export default function Login() {
             // Store token and redirect
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
-            navigate('/dashboard');
+            if (data.user.role === 'PROFESSOR') {
+                navigate('/professor/dashboard');
+            } else {
+                navigate('/dashboard');
+            }
 
         } catch (err) {
             setErrorMsg(err.message);

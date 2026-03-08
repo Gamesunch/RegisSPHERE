@@ -65,14 +65,20 @@ exports.enrollCourse = async (req, res) => {
 
 exports.getMyEnrollments = async (req, res) => {
     try {
-        const result = await db.query(
-            `SELECT e.id as enrollment_id, e.status, e.grade, c.*, u.last_name as prof_last 
-       FROM enrollments e
-       JOIN courses c ON e.course_id = c.id
-       LEFT JOIN users u ON c.professor_id = u.id
-       WHERE e.student_id = $1`,
-            [req.user.id]
-        );
+        const result = await db.query(`
+            SELECT e.id as enrollment_id, e.status, e.grade, c.*, 
+                COALESCE(
+                    json_agg(
+                        json_build_object('id', u.id, 'first_name', u.first_name, 'last_name', u.last_name)
+                    ) FILTER (WHERE u.id IS NOT NULL), 
+                '[]') as professors
+            FROM enrollments e
+            JOIN courses c ON e.course_id = c.id
+            LEFT JOIN course_professors cp ON c.id = cp.course_id
+            LEFT JOIN users u ON cp.professor_id = u.id
+            WHERE e.student_id = $1
+            GROUP BY e.id, c.id
+        `, [req.user.id]);
         res.json(result.rows);
     } catch (error) {
         console.error(error);

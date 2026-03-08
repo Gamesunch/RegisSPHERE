@@ -55,3 +55,37 @@ exports.getMyGrades = async (req, res) => {
         res.status(500).json({ error: 'Server error fetching grades' });
     }
 };
+
+exports.updateGrade = async (req, res) => {
+    try {
+        const { enrollmentId } = req.params;
+        const { grade } = req.body;
+
+        const checkCourse = await db.query(
+            `SELECT cp.professor_id 
+             FROM enrollments e 
+             JOIN courses c ON e.course_id = c.id 
+             LEFT JOIN course_professors cp ON c.id = cp.course_id AND cp.professor_id = $2
+             WHERE e.id = $1`,
+            [enrollmentId, req.user.id]
+        );
+
+        if (checkCourse.rows.length === 0) {
+            return res.status(404).json({ error: 'Enrollment not found' });
+        }
+
+        if (!checkCourse.rows[0].professor_id) {
+            return res.status(403).json({ error: 'You do not teach this course' });
+        }
+
+        const result = await db.query(
+            `UPDATE enrollments SET grade = $1 WHERE id = $2 RETURNING *`,
+            [grade, enrollmentId]
+        );
+
+        res.json({ message: 'Grade updated successfully', enrollment: result.rows[0] });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error updating grade' });
+    }
+};
