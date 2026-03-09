@@ -12,8 +12,10 @@ RegisSPHERE is a modern, comprehensive student portal and university management 
 ## Core Features
 
 - **Dynamic Localization**: Built-in, instant switching between English and Thai languages across the entire application interface.
-- **Secure Authentication**: Robust user registration and login flows utilizing JWT for session management and Bcrypt for password hashing. Includes specific Student and Admin roles.
+- **Secure Authentication**: Robust user registration and login flows utilizing JWT for session management and Bcrypt for password hashing. Includes specific Student, Professor, and Admin roles.
 - **Student Dashboard**: A central hub providing an overview of the student's status with quick navigation to primary academic modules.
+- **Professor Portal**: Dedicated dashboard for professors to view their assigned courses, manage class rosters, and oversee course details.
+- **University News & Announcements**: Global university news system alongside course-specific announcement feeds to keep students and staff informed.
 - **Profile Management**: A dedicated settings module allowing users to upload custom profile pictures safely and edit biographical details.
 - **Course Enrollment**: An interactive catalog allowing students to search for available courses, view detailed metrics (credits, schedules, capacity, professor), and manage live enrollments or drops.
 - **Academic Scheduling**: A detailed "My Courses" interface segmented into logical tabs:
