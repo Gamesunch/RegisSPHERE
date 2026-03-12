@@ -73,7 +73,21 @@ export default function Sidebar({ activePath }) {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
             className="glass-panel"
-            style={{ width: '280px', height: '100vh', padding: '2.5rem 1rem', display: 'flex', flexDirection: 'column', borderRadius: '0 24px 24px 0', borderLeft: 'none', borderTop: 'none', borderBottom: 'none' }}
+            style={{ 
+                width: '280px', 
+                height: '100vh', 
+                padding: '2.5rem 1rem', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                borderRadius: '0 24px 24px 0', 
+                borderLeft: 'none', 
+                borderTop: 'none', 
+                borderBottom: 'none',
+                position: 'sticky',
+                left: 0,
+                top: 0,
+                zIndex: 100
+            }}
         >
             <div style={{ padding: '0 1rem', marginBottom: '3rem' }}>
                 <h2 style={{ fontSize: '1.8rem', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '4px' }}>

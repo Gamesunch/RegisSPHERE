@@ -60,6 +60,37 @@ export default function StudyPath() {
         setLoading(false);
     };
 
+    // Drag-to-Scroll Logic
+    const scrollRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+
+    const handleMouseDown = (e) => {
+        // Only trigger if clicking the background or non-interactive elements
+        if (e.target.closest('button') || e.target.closest('.course-card-inner')) return;
+        
+        setIsDragging(true);
+        setStartX(e.pageX - scrollRef.current.offsetLeft);
+        setScrollLeft(scrollRef.current.scrollLeft);
+    };
+
+    const handleMouseLeave = () => {
+        setIsDragging(false);
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - scrollRef.current.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll speed
+        scrollRef.current.scrollLeft = scrollLeft - walk;
+    };
+
     const calculateLines = () => {
         if (!containerRef.current) return;
         const containerRect = containerRef.current.getBoundingClientRect();
@@ -162,9 +193,24 @@ export default function StudyPath() {
     if (loading) return <div className="flex-center" style={{ height: '100vh', color: 'white' }}>Loading Curriculum...</div>;
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg-dark)' }}>
+        <div style={{ display: 'flex', width: '100%', minHeight: '100vh', background: 'var(--color-bg-dark)' }}>
             <Sidebar activePath="/study-path" />
-            <main style={{ flex: 1, padding: '2rem', overflowX: 'auto', position: 'relative' }}>
+            <main 
+                ref={scrollRef}
+                onMouseDown={handleMouseDown}
+                onMouseLeave={handleMouseLeave}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+                style={{ 
+                    flex: 1, 
+                    padding: '2rem', 
+                    overflowX: 'auto', 
+                    position: 'relative', 
+                    minWidth: 0,
+                    cursor: isDragging ? 'grabbing' : 'grab',
+                    userSelect: isDragging ? 'none' : 'auto'
+                }}
+            >
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ minWidth: 'fit-content' }}>
                     <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                         <div>
@@ -282,7 +328,7 @@ export default function StudyPath() {
                                                     key={course.id}
                                                     ref={el => cardRefs.current[course.id] = el}
                                                     whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)' }}
-                                                    className="glass-panel"
+                                                    className="glass-panel course-card-inner"
                                                     style={{ 
                                                         padding: '1.2rem', 
                                                         borderLeft: `4px solid ${color}`,
@@ -292,7 +338,8 @@ export default function StudyPath() {
                                                         transition: 'all 0.3s ease',
                                                         display: 'flex',
                                                         flexDirection: 'column',
-                                                        minHeight: '160px'
+                                                        minHeight: '160px',
+                                                        cursor: 'default'
                                                     }}
                                                 >
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
@@ -323,6 +370,22 @@ export default function StudyPath() {
                                                             {getStatusIcon(status)}
                                                             {status}
                                                         </div>
+
+                                                        {status === 'LOCKED' && course.prerequisites?.length > 0 && (
+                                                            <div style={{ 
+                                                                fontSize: '0.7rem', 
+                                                                color: 'var(--color-primary)', 
+                                                                marginTop: '8px',
+                                                                padding: '6px',
+                                                                background: 'rgba(242, 159, 5, 0.05)',
+                                                                borderRadius: '4px',
+                                                                border: '1px solid rgba(242, 159, 5, 0.1)',
+                                                                lineHeight: 1.2,
+                                                                fontWeight: 600
+                                                            }}>
+                                                                Prerequisite: {course.prerequisites.map(p => p.code).join(', ')}
+                                                            </div>
+                                                        )}
 
                                                         {status === 'READY' && (
                                                             <button 
