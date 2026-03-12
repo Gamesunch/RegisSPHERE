@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { BookOpen, CheckCircle, Lock, Play, Layers, Send, ChevronRight } from 'lucide-react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BookOpen, CheckCircle, Lock, Play, Layers, Send, Clock, MapPin, Filter } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 
 const API_BASE = 'http://localhost:5000';
@@ -10,6 +10,7 @@ export default function StudyPath() {
     const [myEnrollments, setMyEnrollments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [enrollingId, setEnrollingId] = useState(null);
+    const [selectedTrack, setSelectedTrack] = useState('ALL');
     const [lineCoords, setLineCoords] = useState([]);
     
     const containerRef = useRef(null);
@@ -19,13 +20,27 @@ export default function StudyPath() {
         fetchData();
     }, []);
 
+    const tracks = useMemo(() => {
+        const uniqueTracks = [...new Set(courses.map(c => c.track))].filter(t => t !== 'CORE' && t !== 'OUTSIDE');
+        return ['ALL', ...uniqueTracks, 'OUTSIDE'];
+    }, [courses]);
+
+    const filteredCourses = useMemo(() => {
+        if (selectedTrack === 'ALL') return courses.filter(c => c.track === 'CORE' || c.track === 'OUTSIDE' || c.track === 'ALL');
+        return courses.filter(c => c.track === 'CORE' || c.track === selectedTrack);
+    }, [courses, selectedTrack]);
+
     useEffect(() => {
-        if (!loading && courses.length > 0) {
-            calculateLines();
+        if (!loading && filteredCourses.length > 0) {
+            // Wait for DOM to update after filtering
+            const timer = setTimeout(calculateLines, 300);
             window.addEventListener('resize', calculateLines);
-            return () => window.removeEventListener('resize', calculateLines);
+            return () => {
+                clearTimeout(timer);
+                window.removeEventListener('resize', calculateLines);
+            };
         }
-    }, [loading, courses, myEnrollments]);
+    }, [loading, filteredCourses, myEnrollments]);
 
     const fetchData = async () => {
         const token = localStorage.getItem('token');
@@ -50,7 +65,7 @@ export default function StudyPath() {
         const containerRect = containerRef.current.getBoundingClientRect();
         const newLines = [];
 
-        courses.forEach(course => {
+        filteredCourses.forEach(course => {
             if (course.prerequisites && course.prerequisites.length > 0) {
                 const targetEl = cardRefs.current[course.id];
                 if (!targetEl) return;
@@ -61,7 +76,6 @@ export default function StudyPath() {
                     if (!sourceEl) return;
                     const sourceRect = sourceEl.getBoundingClientRect();
 
-                    // Calculate start and end points relative to SVG container
                     const startX = sourceRect.right - containerRect.left;
                     const startY = sourceRect.top + sourceRect.height / 2 - containerRect.top;
                     const endX = targetRect.left - containerRect.left;
@@ -152,11 +166,40 @@ export default function StudyPath() {
             <Sidebar activePath="/study-path" />
             <main style={{ flex: 1, padding: '2rem', overflowX: 'auto', position: 'relative' }}>
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ minWidth: 'fit-content' }}>
-                    <header style={{ marginBottom: '2rem' }}>
-                        <h1 style={{ fontSize: '2.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <Layers className="text-primary" /> Study Path Guidance
-                        </h1>
-                        <p style={{ color: 'var(--color-text-muted)' }}>Computer Science Program (2564 Revision)</p>
+                    <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                        <div>
+                            <h1 style={{ fontSize: '2.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <Layers className="text-primary" /> Study Path Guidance
+                            </h1>
+                            <p style={{ color: 'var(--color-text-muted)' }}>Computer Science Program (2564 Revision)</p>
+                        </div>
+                        
+                        {/* Track Selector */}
+                        <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            {tracks.map(t => (
+                                <button
+                                    key={t}
+                                    onClick={() => setSelectedTrack(t)}
+                                    style={{
+                                        padding: '6px 12px',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 700,
+                                        cursor: 'pointer',
+                                        background: selectedTrack === t ? 'var(--color-primary)' : 'transparent',
+                                        color: selectedTrack === t ? 'white' : 'var(--color-text-muted)',
+                                        transition: 'all 0.2s ease',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}
+                                >
+                                    {t === 'ALL' ? <Filter size={12} /> : null}
+                                    {t}
+                                </button>
+                            ))}
+                        </div>
                     </header>
 
                     <div style={{ position: 'relative' }} ref={containerRef}>
@@ -177,7 +220,7 @@ export default function StudyPath() {
                             </defs>
                             {lineCoords.map((line, i) => (
                                 <line 
-                                    key={i}
+                                    key={`${selectedTrack}-${i}`}
                                     x1={line.startX} y1={line.startY} 
                                     x2={line.endX} y2={line.endY} 
                                     stroke={line.status === 'COMPLETED' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255,255,255,0.1)'} 
@@ -192,7 +235,7 @@ export default function StudyPath() {
                             {yearGroups.map((year, idx) => (
                                 <div key={idx} style={{ 
                                     flex: year.sems.length, 
-                                    minWidth: `${year.sems.length * 220}px`,
+                                    minWidth: `${year.sems.length * 240}px`,
                                     background: `linear-gradient(180deg, ${year.color}33, transparent)`,
                                     padding: '0.8rem',
                                     borderRadius: '12px 12px 0 0',
@@ -211,7 +254,7 @@ export default function StudyPath() {
                         {/* Semester Grid */}
                         <div style={{ display: 'flex', gap: '1.5rem' }}>
                             {semesters.map(sem => (
-                                <div key={sem} style={{ minWidth: '220px', flex: 1 }}>
+                                <div key={sem} style={{ minWidth: '240px', flex: 1 }}>
                                     <div style={{ 
                                         background: 'var(--color-bg-light)', 
                                         padding: '0.6rem', 
@@ -226,11 +269,16 @@ export default function StudyPath() {
                                         SEM {sem}
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                                        {courses.filter(c => c.semester_number === sem).map(course => {
+                                        <AnimatePresence mode="popLayout">
+                                        {filteredCourses.filter(c => c.semester_number === sem).map(course => {
                                             const status = getCourseStatus(course);
                                             const color = getStatusColor(status);
                                             return (
                                                 <motion.div 
+                                                    layout
+                                                    initial={{ opacity: 0, scale: 0.9 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    exit={{ opacity: 0, scale: 0.9 }}
                                                     key={course.id}
                                                     ref={el => cardRefs.current[course.id] = el}
                                                     whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)' }}
@@ -244,7 +292,7 @@ export default function StudyPath() {
                                                         transition: 'all 0.3s ease',
                                                         display: 'flex',
                                                         flexDirection: 'column',
-                                                        minHeight: '140px'
+                                                        minHeight: '160px'
                                                     }}
                                                 >
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
@@ -256,8 +304,18 @@ export default function StudyPath() {
                                                         </span>
                                                     </div>
                                                     
-                                                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text)', lineHeight: 1.3, marginBottom: '1rem', flexGrow: 1 }}>
+                                                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text)', lineHeight: 1.3, marginBottom: '0.8rem', flexGrow: 1 }}>
                                                         {course.name}
+                                                    </div>
+
+                                                    {/* Schedule Info */}
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '1rem' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+                                                            <Clock size={12} className="text-primary" /> {course.schedule_time}
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+                                                            <MapPin size={12} className="text-primary" /> {course.room}
+                                                        </div>
                                                     </div>
                                                     
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
@@ -294,6 +352,7 @@ export default function StudyPath() {
                                                 </motion.div>
                                             );
                                         })}
+                                        </AnimatePresence>
                                     </div>
                                 </div>
                             ))}
