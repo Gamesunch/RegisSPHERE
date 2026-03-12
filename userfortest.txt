@@ -2,3 +2,4 @@ Role    Email    Password
 Student    student@test.com    password123
 Student    sun@uni.com    123456
 Professor    professor@test.com    password123
+admin    admin@test.com    password123

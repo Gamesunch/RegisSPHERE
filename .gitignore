@@ -103,3 +103,5 @@ Thumbs.db
 # Uploaded profile pictures
 backend/uploads/*
 !backend/uploads/.gitkeep
+Report Project SA.pdf
+userfortest.txt
