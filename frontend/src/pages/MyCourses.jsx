@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Clock, MapPin, User, Trash2, GraduationCap, Calendar, FileText, Download, Award } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import Sidebar from '../components/Sidebar';
 import html2canvas from 'html2canvas';
 
@@ -67,11 +66,19 @@ export default function MyCourses() {
     const [loadingAnnouncements, setLoadingAnnouncements] = useState(false);
     const timetableRef = useRef(null);
 
+    const [searchParams] = useSearchParams();
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) { navigate('/login'); return; }
+
+        const tab = searchParams.get('tab');
+        if (tab && ['courses', 'timetable', 'exam'].includes(tab)) {
+            setActiveTab(tab);
+        }
+
         fetchData();
-    }, [navigate]);
+    }, [navigate, searchParams]);
 
     const fetchData = async () => {
         const token = localStorage.getItem('token');
@@ -169,7 +176,7 @@ export default function MyCourses() {
                         <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('my_courses_desc')}</p>
                     </div>
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <LanguageSwitcher />
+
                         {fullPictureUrl ? (
                             <img src={fullPictureUrl} alt="Profile" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 10px rgba(217, 121, 4, 0.3)' }} />
                         ) : (

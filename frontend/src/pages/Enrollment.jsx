@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Search, BookPlus, Clock, MapPin, User, Hash, Award } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Search, BookPlus, Clock, MapPin, User, Hash, Award, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import Sidebar from '../components/Sidebar';
 
 const API_BASE = 'http://localhost:5000';
@@ -127,7 +126,7 @@ export default function Enrollment() {
                         <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('browse_enroll_desc')}</p>
                     </div>
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <LanguageSwitcher />
+
                         {fullPictureUrl ? (
                             <img src={fullPictureUrl} alt="Profile" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 10px rgba(217, 121, 4, 0.3)' }} />
                         ) : (
@@ -202,8 +201,19 @@ export default function Enrollment() {
 
                                 {isEnrolled ? (
                                     <div style={{
-                                        padding: '0.8rem', textAlign: 'center', borderRadius: '12px',
+                                        padding: '0.8rem', 
+                                        textAlign: 'center', 
+                                        borderRadius: '12px',
+                                        background: 'rgba(242, 159, 5, 0.12)',
+                                        color: 'var(--color-primary)',
+                                        fontWeight: 700,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.5rem',
+                                        border: '1px solid rgba(242, 159, 5, 0.2)'
                                     }}>
+                                        <Check size={18} strokeWidth={3} />
                                         {enrollment.status === 'PRE_ENROLLED' ? t('pre_enrolled') : (enrollment.status === 'WAITLISTED' ? t('waitlisted') : t('enrolled_badge'))}
                                     </div>
                                 ) : (

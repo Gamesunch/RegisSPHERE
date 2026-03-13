@@ -375,7 +375,7 @@ const translations = {
         'news_posted_success': 'โพสต์ข่าวสารมหาวิทยาลัยสำเร็จแล้ว!',
         'news_post_error': 'โพสต์ข่าวสารไม่สำเร็จ',
         'error_loading_user_data': 'เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้',
-        'student_portal': 'พอร์ทัลนักศึกษา',
+        'student_portal': 'Student Portal',
         'admin_role_display': 'ผู้ดูแลระบบ',
         'student_role_display': 'นักศึกษา',
         'no_announcements': 'ไม่มีประกาศในขณะนี้',
@@ -518,7 +518,7 @@ const translations = {
         'download_enrolled_students_csv': 'ดาวน์โหลดรายชื่อนักศึกษา (CSV)',
 
         // Dashboard
-        'student_portal': 'พอร์ทัลนักศึกษา',
+        'student_portal': 'Student Portal',
         'logout': 'ออกจากระบบ',
         'overview': 'ภาพรวม',
         'my_courses': 'วิชาของฉัน',
@@ -636,7 +636,7 @@ const translations = {
 
         // Course Management
         'course_mgmt_title': 'จัดการรายวิชา',
-        'course_mgmt_desc': 'เพิ่ม แก้ไข หรือลบรายวิชาของมหาวิทยาลัย',
+        'course_mgmt_desc': 'เพิ่ม, แก้ไข, หรือลบรายวิชาของมหาวิทยาลัย',
         'all_courses': 'รายวิชาทั้งหมด',
         'all_classes': 'คลาสทั้งหมด',
         'add_new_course': 'เพิ่มรายวิชาใหม่',
@@ -675,7 +675,7 @@ const translations = {
         'download': 'ดาวน์โหลด',
 
         // Study Path
-        'study_path_title': 'คำแนะนำเส้นทางการศึกษา',
+        'study_path_title': 'แนะนำเส้นทางการศึกษา',
         'study_path_desc': 'หลักสูตรวิทยาการคอมพิวเตอร์ (ปรับปรุง 2564)',
         'track_all': 'ทั้งหมด',
         'track_outside': 'วิชานอกภาค',

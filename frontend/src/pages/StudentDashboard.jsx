@@ -1,10 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function StudentDashboard({ user, stats, todaySchedule, announcements }) {
     const { t } = useLanguage();
+    const navigate = useNavigate();
 
     return (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '2rem', paddingBottom: '2rem' }}>
@@ -35,7 +37,13 @@ export default function StudentDashboard({ user, stats, todaySchedule, announcem
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass-panel" style={{ gridColumn: 'span 8', padding: '2.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                     <h3 style={{ fontSize: '1.4rem', fontWeight: 600 }}>{t('today_schedule')}</h3>
-                    <button className="btn" style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text)', padding: '0.5rem 1rem', fontSize: '0.9rem', border: '1px solid var(--glass-border)' }}>{t('view_calendar')}</button>
+                    <button 
+                        className="btn" 
+                        style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text)', padding: '0.5rem 1rem', fontSize: '0.9rem', border: '1px solid var(--glass-border)' }}
+                        onClick={() => navigate('/my-courses?tab=timetable')}
+                    >
+                        {t('view_calendar')}
+                    </button>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>

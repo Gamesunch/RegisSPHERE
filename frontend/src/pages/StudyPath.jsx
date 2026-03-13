@@ -5,7 +5,6 @@ import Sidebar from '../components/Sidebar';
 
 const API_BASE = 'http://localhost:5000';
 import { useLanguage } from '../context/LanguageContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function StudyPath() {
     const { t } = useLanguage();
@@ -157,7 +156,7 @@ export default function StudyPath() {
     ];
 
     const getCourseStatus = (course) => {
-        const enrollment = myEnrollments.find(e => e.course_id === course.id);
+        const enrollment = myEnrollments.find(e => e.id === course.id);
         if (enrollment) {
             if (enrollment.grade && !['F', 'W'].includes(enrollment.grade)) return 'COMPLETED';
             return 'ENROLLED';
@@ -165,7 +164,7 @@ export default function StudyPath() {
 
         if (course.prerequisites && course.prerequisites.length > 0) {
             const allMet = course.prerequisites.every(p => {
-                const preEnroll = myEnrollments.find(e => e.course_id === p.id);
+                const preEnroll = myEnrollments.find(e => e.id === p.id);
                 return preEnroll && preEnroll.grade && !['F', 'W'].includes(preEnroll.grade);
             });
             return allMet ? 'READY' : 'LOCKED';
@@ -226,9 +225,7 @@ export default function StudyPath() {
                             </h1>
                             <p style={{ color: 'var(--color-text-muted)' }}>{t('cs_program')}</p>
                         </div>
-                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                            <LanguageSwitcher />
-                        </div>
+
                         
                         {/* Track Selector */}
                         <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -356,7 +353,8 @@ export default function StudyPath() {
                                                         <span style={{ fontSize: '0.7rem', fontWeight: 700, color: color, letterSpacing: '0.5px' }}>
                                                             {course.code}
                                                         </span>
-                                                        <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-muted)' }}>
+                                                        <span style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            {(status === 'ENROLLED' || status === 'COMPLETED') && <CheckCircle size={10} color="var(--color-primary)" />}
                                                             {course.credits} {t('credits_abbr')}
                                                         </span>
                                                     </div>
@@ -378,7 +376,11 @@ export default function StudyPath() {
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
                                                         <div style={{ color: color, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 700 }}>
                                                             {getStatusIcon(status)}
-                                                            {getStatusText(status)}
+                                                            {status === 'ENROLLED' ? (
+                                                                <span style={{ background: 'rgba(242, 159, 5, 0.12)', color: 'var(--color-primary)', padding: '2px 8px', borderRadius: '4px', marginLeft: '4px', border: '1px solid rgba(242, 159, 5, 0.2)' }}>
+                                                                    {t('enrolled')}
+                                                                </span>
+                                                            ) : getStatusText(status)}
                                                         </div>
 
                                                         {status === 'LOCKED' && course.prerequisites?.length > 0 && (

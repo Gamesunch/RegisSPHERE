@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { LayoutDashboard, BookOpen, Users, Settings as SettingsIcon, LogOut, Camera, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import Sidebar from '../components/Sidebar';
 
 const API_BASE = 'http://localhost:5000';
@@ -149,7 +148,7 @@ export default function Settings() {
                         <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('personal_settings_desc')}</p>
                     </div>
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <LanguageSwitcher />
+
                         {fullPictureUrl ? (
                             <img src={fullPictureUrl} alt="Profile" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 10px rgba(217, 121, 4, 0.3)' }} />
                         ) : (
