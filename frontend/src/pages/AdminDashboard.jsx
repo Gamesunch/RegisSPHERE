@@ -9,6 +9,8 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
     const [demandData, setDemandData] = useState([]);
     const [confirmPhaseModal, setConfirmPhaseModal] = useState({ show: false, newPhase: null });
     const [capacityModal, setCapacityModal] = useState({ show: false, course: null, newCapacity: '' });
+    const [phaseUpdating, setPhaseUpdating] = useState(false);
+    const [capacityUpdating, setCapacityUpdating] = useState(false);
     const [stats, setStats] = useState({ totalCourses: 0, overSubscribed: 0 });
     const [newsTitle, setNewsTitle] = useState('');
     const [newsContent, setNewsContent] = useState('');
@@ -47,23 +49,39 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
 
     const executePhaseChange = async () => {
         const { newPhase } = confirmPhaseModal;
-        if (!newPhase) return;
+        if (!newPhase || phaseUpdating) return;
 
-        setAdminPhase(newPhase);
-        await fetch(`${API_BASE_URL}/api/admin/phase`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ phase: newPhase })
-        });
+        setPhaseUpdating(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/admin/phase`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ phase: newPhase })
+            });
 
-        setConfirmPhaseModal({ show: false, newPhase: null });
-        window.location.reload();
+            if (res.ok) {
+                setAdminPhase(newPhase);
+                setConfirmPhaseModal({ show: false, newPhase: null });
+                window.location.reload();
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to update phase');
+                setConfirmPhaseModal({ show: false, newPhase: null });
+            }
+        } catch (error) {
+            console.error('Error updating phase:', error);
+            alert('Server error updating phase. Please try again.');
+            setConfirmPhaseModal({ show: false, newPhase: null });
+        } finally {
+            setPhaseUpdating(false);
+        }
     };
 
     const handleCapacityUpdate = async () => {
         const { course, newCapacity } = capacityModal;
-        if (!course || !newCapacity) return;
+        if (!course || !newCapacity || capacityUpdating) return;
 
+        setCapacityUpdating(true);
         try {
             const res = await fetch(`${API_BASE_URL}/api/admin/courses/${course.id}/capacity`, {
                 method: 'PUT',
@@ -87,6 +105,8 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
         } catch (error) {
             console.error('Error updating capacity:', error);
             alert('Failed to update capacity');
+        } finally {
+            setCapacityUpdating(false);
         }
     };
 
@@ -329,9 +349,9 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                                 style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid var(--color-border-light)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
                                 {t('cancel')}
                             </button>
-                            <button className="btn" onClick={executePhaseChange}
-                                style={{ flex: 1, padding: '0.8rem', background: '#ef4444', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(239, 68, 68, 0.3)' }}>
-                                {t('confirm')}
+                            <button className="btn" onClick={executePhaseChange} disabled={phaseUpdating}
+                                style={{ flex: 1, padding: '0.8rem', background: '#ef4444', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(239, 68, 68, 0.3)', opacity: phaseUpdating ? 0.7 : 1 }}>
+                                {phaseUpdating ? '...' : t('confirm')}
                             </button>
                         </div>
                     </motion.div>
@@ -379,9 +399,9 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                                 style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid var(--color-border-light)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
                                 {t('cancel')}
                             </button>
-                            <button className="btn" onClick={handleCapacityUpdate}
-                                style={{ flex: 1, padding: '0.8rem', background: 'var(--color-primary)', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(var(--color-primary-rgb), 0.3)' }}>
-                                {t('confirm')}
+                            <button className="btn" onClick={handleCapacityUpdate} disabled={capacityUpdating}
+                                style={{ flex: 1, padding: '0.8rem', background: 'var(--color-primary)', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(var(--color-primary-rgb), 0.3)', opacity: capacityUpdating ? 0.7 : 1 }}>
+                                {capacityUpdating ? '...' : t('confirm')}
                             </button>
                         </div>
                     </motion.div>
