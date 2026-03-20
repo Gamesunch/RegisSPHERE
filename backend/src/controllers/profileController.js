@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
+const sharp = require('sharp');
 
 // Initialize Supabase client
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
@@ -75,7 +76,7 @@ exports.updateProfile = async (req, res) => {
     }
 };
 
-// POST /api/profile/picture - Upload profile picture to Supabase Storage
+// POST /api/profile/picture - Upload profile picture to Supabase Storage with optimization
 exports.uploadProfilePicture = async (req, res) => {
     try {
         if (!req.file) {
@@ -90,14 +91,23 @@ exports.uploadProfilePicture = async (req, res) => {
         
         const oldPictureUrl = oldResult.rows.length > 0 ? oldResult.rows[0].profile_picture_url : null;
 
-        // 2. Upload new picture to Supabase Storage
-        const fileExt = path.extname(req.file.originalname);
-        const fileName = `profile_${req.user.id}_${Date.now()}${fileExt}`;
+        // 2. Process image: Resize to 400x400 and convert to WebP
+        // This keeps file sizes around 20-50KB, well within the 50MB limit
+        const optimizedBuffer = await sharp(req.file.buffer)
+            .resize(400, 400, {
+                fit: 'cover',
+                position: 'center'
+            })
+            .webp({ quality: 80 })
+            .toBuffer();
+
+        const fileName = `profile_${req.user.id}_${Date.now()}.webp`;
         
+        // 3. Upload new optimized picture to Supabase Storage
         const { data, error: uploadError } = await supabase.storage
             .from('profile-pictures')
-            .upload(fileName, req.file.buffer, {
-                contentType: req.file.mimetype,
+            .upload(fileName, optimizedBuffer, {
+                contentType: 'image/webp',
                 upsert: true
             });
 
@@ -106,18 +116,18 @@ exports.uploadProfilePicture = async (req, res) => {
             return res.status(500).json({ error: 'Failed to upload image to cloud storage' });
         }
 
-        // 3. Get the public URL for the new picture
+        // 4. Get the public URL for the new picture
         const { data: { publicUrl } } = supabase.storage
             .from('profile-pictures')
             .getPublicUrl(fileName);
 
-        // 4. Update user record in database
+        // 5. Update user record in database
         await db.query(
             `UPDATE users SET profile_picture_url = $1 WHERE id = $2`,
             [publicUrl, req.user.id]
         );
 
-        // 5. Cleanup: Delete old picture if it was a Supabase bucket file
+        // 6. Cleanup: Delete old picture if it was a Supabase bucket file
         if (oldPictureUrl && oldPictureUrl.includes('profile-pictures')) {
             const oldFileName = oldPictureUrl.split('/').pop();
             await supabase.storage
