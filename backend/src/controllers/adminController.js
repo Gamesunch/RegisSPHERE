@@ -43,35 +43,48 @@ exports.setPhase = async (req, res) => {
                     [course_id]
                 );
                 let currentEnrolled = parseInt(enrolledRes.rows[0].count);
-
                 let availableSeats = capacity - currentEnrolled;
 
-                // Get all PRE_ENROLLED students for this course, ordered by enrolled_at
-                const preEnrolledRes = await db.query(
-                    "SELECT id FROM enrollments WHERE course_id = $1 AND status = 'PRE_ENROLLED' ORDER BY enrolled_at ASC",
+                // Optimized: Process all PRE_ENROLLED students for this course in ONE query
+                await db.query(`
+                    UPDATE enrollments
+                    SET status = CASE 
+                        WHEN sub.row_num <= $2 THEN 'ENROLLED'::enrollment_status 
+                        ELSE 'WAITLISTED'::enrollment_status 
+                    END
+                    FROM (
+                        SELECT id, ROW_NUMBER() OVER (ORDER BY enrolled_at ASC) as row_num
+                        FROM enrollments
+                        WHERE course_id = $1 AND status = 'PRE_ENROLLED'
+                    ) as sub
+                    WHERE enrollments.id = sub.id
+                `, [course_id, availableSeats]);
+
+                // Recalculate available seats for waitlist promotion
+                const preEnrolledCountRes = await db.query(
+                    "SELECT COUNT(*) FROM enrollments WHERE course_id = $1 AND status = 'PRE_ENROLLED' AND created_at < NOW()", // Hack to get original count if needed
                     [course_id]
                 );
+                // Actually easier to just check how many are ENROLLED now
+                const newTotalEnrolledRes = await db.query(
+                    "SELECT COUNT(*) FROM enrollments WHERE course_id = $1 AND status = 'ENROLLED'",
+                    [course_id]
+                );
+                const newTotalEnrolled = parseInt(newTotalEnrolledRes.rows[0].count);
+                availableSeats = capacity - newTotalEnrolled;
 
-                for (const row of preEnrolledRes.rows) {
-                    if (availableSeats > 0) {
-                        // Enroll them
-                        await db.query("UPDATE enrollments SET status = 'ENROLLED' WHERE id = $1", [row.id]);
-                        availableSeats--;
-                    } else {
-                        // Waitlist them
-                        await db.query("UPDATE enrollments SET status = 'WAITLISTED' WHERE id = $1", [row.id]);
-                    }
-                }
-
-                // If there are STILL available seats, check if anyone is currently WAITLISTED and promote them
+                // Optimized: Promote current WAITLISTED students if seats remain
                 if (availableSeats > 0) {
-                    const waitlistedRes = await db.query(
-                        "SELECT id FROM enrollments WHERE course_id = $1 AND status = 'WAITLISTED' ORDER BY enrolled_at ASC LIMIT $2",
-                        [course_id, availableSeats]
-                    );
-                    for (const row of waitlistedRes.rows) {
-                        await db.query("UPDATE enrollments SET status = 'ENROLLED' WHERE id = $1", [row.id]);
-                    }
+                    await db.query(`
+                        UPDATE enrollments 
+                        SET status = 'ENROLLED' 
+                        WHERE id IN (
+                            SELECT id FROM enrollments 
+                            WHERE course_id = $1 AND status = 'WAITLISTED' 
+                            ORDER BY enrolled_at ASC 
+                            LIMIT $2
+                        )
+                    `, [course_id, availableSeats]);
                 }
             }
         }
@@ -87,7 +100,6 @@ exports.setPhase = async (req, res) => {
 
 exports.getDemand = async (req, res) => {
     try {
-        // Return courses with their capacity, current ENROLLED count, PRE_ENROLLED count, and WAITLISTED count
         const result = await db.query(`
             SELECT 
                 c.id, c.code, c.name, c.capacity,
@@ -113,13 +125,12 @@ exports.updateCapacity = async (req, res) => {
 
         await db.query('BEGIN');
 
-        // 1. Get old capacity
+        // 1. Get current course
         const oldCourseRes = await db.query("SELECT capacity FROM courses WHERE id = $1", [id]);
         if (oldCourseRes.rows.length === 0) {
             await db.query('ROLLBACK');
             return res.status(404).json({ error: 'Course not found' });
         }
-        const oldCapacity = oldCourseRes.rows[0].capacity;
 
         // 2. Update capacity
         const result = await db.query(
@@ -128,8 +139,7 @@ exports.updateCapacity = async (req, res) => {
         );
         const updatedCourse = result.rows[0];
 
-        // 3. Promote waitlisted students if there are available seats
-        // Count current officially ENROLLED to find actual available seats
+        // 3. Optimized: Promote waitlisted students if there are available seats
         const enrolledRes = await db.query(
             "SELECT COUNT(*) FROM enrollments WHERE course_id = $1 AND status = 'ENROLLED'",
             [id]
@@ -138,14 +148,16 @@ exports.updateCapacity = async (req, res) => {
         let availableSeats = capacity - currentEnrolled;
 
         if (availableSeats > 0) {
-            const waitlistedRes = await db.query(
-                "SELECT id FROM enrollments WHERE course_id = $1 AND status = 'WAITLISTED' ORDER BY enrolled_at ASC LIMIT $2",
-                [id, availableSeats]
-            );
-
-            for (const row of waitlistedRes.rows) {
-                await db.query("UPDATE enrollments SET status = 'ENROLLED' WHERE id = $1", [row.id]);
-            }
+            await db.query(`
+                UPDATE enrollments 
+                SET status = 'ENROLLED' 
+                WHERE id IN (
+                    SELECT id FROM enrollments 
+                    WHERE course_id = $1 AND status = 'WAITLISTED' 
+                    ORDER BY enrolled_at ASC 
+                    LIMIT $2
+                )
+            `, [id, availableSeats]);
         }
 
         await db.query('COMMIT');
@@ -168,6 +180,7 @@ exports.getStudents = async (req, res) => {
         res.status(500).json({ error: 'Server error fetching students' });
     }
 };
+
 exports.updateStudentYear = async (req, res) => {
     try {
         const { id } = req.params;
