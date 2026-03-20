@@ -62,7 +62,7 @@ exports.setPhase = async (req, res) => {
 
                 // Recalculate available seats for waitlist promotion
                 const preEnrolledCountRes = await db.query(
-                    "SELECT COUNT(*) FROM enrollments WHERE course_id = $1 AND status = 'PRE_ENROLLED' AND created_at < NOW()", // Hack to get original count if needed
+                    "SELECT COUNT(*) FROM enrollments WHERE course_id = $1 AND status = 'PRE_ENROLLED' AND enrolled_at < NOW()", // Hack to get original count if needed
                     [course_id]
                 );
                 // Actually easier to just check how many are ENROLLED now

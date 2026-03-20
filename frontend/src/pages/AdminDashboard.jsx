@@ -227,7 +227,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                                                         onClick={async () => {
                                                             const newCap = prompt(`Enter new capacity for ${course.code} (Current: ${course.capacity}):`, course.capacity);
                                                             if (newCap && !isNaN(newCap)) {
-                                                                await fetch(`http://localhost:5000/api/admin/courses/${course.id}/capacity`, {
+                                                                await fetch(`${API_BASE_URL}/api/admin/courses/${course.id}/capacity`, {
                                                                     method: 'PUT',
                                                                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                                                                     body: JSON.stringify({ capacity: parseInt(newCap) })
