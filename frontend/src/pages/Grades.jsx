@@ -44,7 +44,9 @@ export default function Grades() {
     if (loading) return <GradesPageSkeleton />;
 
     const avatarLetter = user?.firstName ? user.firstName[0].toUpperCase() : 'U';
-    const fullPictureUrl = user?.profilePictureUrl ? `${API_BASE}${user.profilePictureUrl}` : '';
+    const fullPictureUrl = user?.profilePictureUrl 
+        ? (user.profilePictureUrl.startsWith('http') ? user.profilePictureUrl : `${API_BASE}${user.profilePictureUrl}`) 
+        : '';
 
     // Get unique academic years
     const years = [...new Set(data.semesters.map(s => s.academic_year))].sort();

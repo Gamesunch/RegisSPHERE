@@ -133,7 +133,9 @@ export default function Settings() {
     if (!user) return <SettingsPageSkeleton />;
 
     const avatarLetter = user.firstName ? user.firstName[0].toUpperCase() : 'U';
-    const fullPictureUrl = profilePictureUrl ? `${API_BASE}${profilePictureUrl}` : '';
+    const fullPictureUrl = profilePictureUrl 
+        ? (profilePictureUrl.startsWith('http') ? profilePictureUrl : `${API_BASE}${profilePictureUrl}`) 
+        : '';
 
     return (
         <div style={{ display: 'flex', height: '100vh', background: 'var(--color-bg-dark)', overflow: 'hidden' }}>

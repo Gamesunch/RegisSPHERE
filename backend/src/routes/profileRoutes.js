@@ -7,17 +7,7 @@ const profileController = require('../controllers/profileController');
 const router = express.Router();
 
 // Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../../uploads'));
-    },
-    filename: (req, file, cb) => {
-        // Create unique filename: userId_timestamp.extension
-        const ext = path.extname(file.originalname);
-        const filename = `profile_${req.user.id}_${Date.now()}${ext}`;
-        cb(null, filename);
-    }
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];

@@ -109,7 +109,9 @@ export default function Enrollment() {
     if (loading) return <CardGridSkeleton cards={6} />;
 
     const avatarLetter = user?.firstName ? user.firstName[0].toUpperCase() : 'U';
-    const fullPictureUrl = user?.profilePictureUrl ? `${API_BASE}${user.profilePictureUrl}` : '';
+    const fullPictureUrl = user?.profilePictureUrl 
+        ? (user.profilePictureUrl.startsWith('http') ? user.profilePictureUrl : `${API_BASE}${user.profilePictureUrl}`) 
+        : '';
 
     return (
         <div style={{ display: 'flex', height: '100vh', background: 'var(--color-bg-dark)', overflow: 'hidden' }}>

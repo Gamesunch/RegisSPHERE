@@ -1,6 +1,9 @@
 const db = require('../config/db');
 const path = require('path');
-const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
+
+// Initialize Supabase client
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 // GET /api/profile - Fetch current user's full profile
 exports.getProfile = async (req, res) => {
@@ -72,46 +75,62 @@ exports.updateProfile = async (req, res) => {
     }
 };
 
-// POST /api/profile/picture - Upload profile picture
+// POST /api/profile/picture - Upload profile picture to Supabase Storage
 exports.uploadProfilePicture = async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        // Delete old profile picture if it exists
+        // 1. Get current profile to check for old picture
         const oldResult = await db.query(
             'SELECT profile_picture_url FROM users WHERE id = $1',
             [req.user.id]
         );
-        if (oldResult.rows.length > 0 && oldResult.rows[0].profile_picture_url) {
-            const oldPath = path.join(__dirname, '../../uploads', path.basename(oldResult.rows[0].profile_picture_url));
-            fs.unlink(oldPath, (err) => {
-                if (err && err.code !== 'ENOENT') {
-                    console.warn('Failed to delete old profile picture:', err.message);
-                }
+        
+        const oldPictureUrl = oldResult.rows.length > 0 ? oldResult.rows[0].profile_picture_url : null;
+
+        // 2. Upload new picture to Supabase Storage
+        const fileExt = path.extname(req.file.originalname);
+        const fileName = `profile_${req.user.id}_${Date.now()}${fileExt}`;
+        
+        const { data, error: uploadError } = await supabase.storage
+            .from('profile-pictures')
+            .upload(fileName, req.file.buffer, {
+                contentType: req.file.mimetype,
+                upsert: true
             });
+
+        if (uploadError) {
+            console.error('Supabase storage upload error:', uploadError);
+            return res.status(500).json({ error: 'Failed to upload image to cloud storage' });
         }
 
-        // Build the URL path to access the uploaded file
-        const profilePictureUrl = `/uploads/${req.file.filename}`;
+        // 3. Get the public URL for the new picture
+        const { data: { publicUrl } } = supabase.storage
+            .from('profile-pictures')
+            .getPublicUrl(fileName);
 
-        const result = await db.query(
-            `UPDATE users SET profile_picture_url = $1 WHERE id = $2 
-             RETURNING id, profile_picture_url`,
-            [profilePictureUrl, req.user.id]
+        // 4. Update user record in database
+        await db.query(
+            `UPDATE users SET profile_picture_url = $1 WHERE id = $2`,
+            [publicUrl, req.user.id]
         );
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
+        // 5. Cleanup: Delete old picture if it was a Supabase bucket file
+        if (oldPictureUrl && oldPictureUrl.includes('profile-pictures')) {
+            const oldFileName = oldPictureUrl.split('/').pop();
+            await supabase.storage
+                .from('profile-pictures')
+                .remove([oldFileName]);
         }
 
         res.json({
-            message: 'Profile picture uploaded successfully',
-            profilePictureUrl: result.rows[0].profile_picture_url
+            message: 'Profile picture updated successfully',
+            profilePictureUrl: publicUrl
         });
     } catch (error) {
-        console.error('Error uploading profile picture:', error);
-        res.status(500).json({ error: 'Server error uploading profile picture' });
+        console.error('Error handling profile picture:', error);
+        res.status(500).json({ error: 'Server error during picture update' });
     }
 };

@@ -144,7 +144,9 @@ export default function MyCourses() {
     if (loading) return <MyCoursesPageSkeleton />;
 
     const avatarLetter = user?.firstName ? user.firstName[0].toUpperCase() : 'U';
-    const fullPictureUrl = user?.profilePictureUrl ? `${API_BASE}${user.profilePictureUrl}` : '';
+    const fullPictureUrl = user?.profilePictureUrl 
+        ? (user.profilePictureUrl.startsWith('http') ? user.profilePictureUrl : `${API_BASE}${user.profilePictureUrl}`) 
+        : '';
 
     const tabs = [
         { key: 'courses', label: t('tab_courses'), icon: BookOpen },
