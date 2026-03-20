@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../config';
 import { motion } from 'framer-motion';
 import { Settings } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -17,7 +18,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
     useEffect(() => {
         const fetchDemand = async () => {
             try {
-                const demandRes = await fetch('http://localhost:5000/api/admin/demand', {
+                const demandRes = await fetch(`${API_BASE_URL}/api/admin/demand`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (demandRes.ok) {
@@ -48,7 +49,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
         if (!newPhase) return;
 
         setAdminPhase(newPhase);
-        await fetch('http://localhost:5000/api/admin/phase', {
+        await fetch(`${API_BASE_URL}/api/admin/phase`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ phase: newPhase })
@@ -62,7 +63,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
         e.preventDefault();
         setNewsPosting(true);
         try {
-            const res = await fetch('http://localhost:5000/api/announcements/university', {
+            const res = await fetch(`${API_BASE_URL}/api/announcements/university`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ title: newsTitle, content: newsContent })
@@ -233,7 +234,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                                                                 });
 
                                                                 // Refresh demand data
-                                                                const demandRes = await fetch('http://localhost:5000/api/admin/demand', { headers: { 'Authorization': `Bearer ${token}` } });
+                                                                const demandRes = await fetch(`${API_BASE_URL}/api/admin/demand`, { headers: { 'Authorization': `Bearer ${token}` } });
                                                                 if (demandRes.ok) {
                                                                     setDemandData(await demandRes.json());
                                                                 }

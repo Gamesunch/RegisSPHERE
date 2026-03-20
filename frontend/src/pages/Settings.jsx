@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { API_BASE_URL } from '../config';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, BookOpen, Users, Settings as SettingsIcon, LogOut, Camera, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -6,7 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import { SettingsPageSkeleton } from '../components/SkeletonLoader';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = API_BASE_URL;
 
 export default function Settings() {
     const navigate = useNavigate();

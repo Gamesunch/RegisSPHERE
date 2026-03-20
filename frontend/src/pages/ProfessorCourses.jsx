@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config';
 import Sidebar from '../components/Sidebar';
 import { motion } from 'framer-motion';
 import { BookOpen, Users } from 'lucide-react';
@@ -17,7 +18,7 @@ export default function ProfessorCourses() {
         const fetchCourses = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('http://localhost:5000/api/courses/professor', {
+                const res = await fetch(`${API_BASE_URL}/api/courses/professor`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {

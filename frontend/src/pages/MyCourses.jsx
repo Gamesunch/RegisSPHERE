@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { API_BASE_URL } from '../config';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Clock, MapPin, User, Trash2, GraduationCap, Calendar, FileText, Download, Award } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -7,7 +8,7 @@ import Sidebar from '../components/Sidebar';
 import { MyCoursesPageSkeleton } from '../components/SkeletonLoader';
 import html2canvas from 'html2canvas';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = API_BASE_URL;
 
 const GRADE_COLORS = {
     'A': '#10b981', 'B+': '#2EA7F2', 'B': '#3b82f6', 'C+': '#F29F05',

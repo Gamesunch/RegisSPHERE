@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Award, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -6,7 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import { GradesPageSkeleton } from '../components/SkeletonLoader';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = API_BASE_URL;
 
 const GRADE_COLORS = {
     'A': '#10b981', 'B+': '#2EA7F2', 'B': '#3b82f6', 'C+': '#F29F05',

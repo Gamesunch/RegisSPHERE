@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { API_BASE_URL } from '../config';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import Sidebar from '../components/Sidebar';
@@ -48,7 +49,7 @@ export default function CourseManagement() {
         const fetchData = async () => {
             try {
                 // Fetch profile
-                const profileRes = await fetch('http://localhost:5000/api/profile', {
+                const profileRes = await fetch(`${API_BASE_URL}/api/profile`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -63,7 +64,7 @@ export default function CourseManagement() {
                 }
 
                 // Fetch all courses
-                const courseRes = await fetch('http://localhost:5000/api/courses', {
+                const courseRes = await fetch(`${API_BASE_URL}/api/courses`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (courseRes.ok) {
@@ -71,7 +72,7 @@ export default function CourseManagement() {
                 }
 
                 // Fetch all professors
-                const profsRes = await fetch('http://localhost:5000/api/users/professors', {
+                const profsRes = await fetch(`${API_BASE_URL}/api/users/professors`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (profsRes.ok) {
@@ -95,7 +96,7 @@ export default function CourseManagement() {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/courses', {
+            const res = await fetch(`${API_BASE_URL}/api/courses`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -160,7 +161,7 @@ export default function CourseManagement() {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/courses/${editingCourse.id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/courses/${editingCourse.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -189,7 +190,7 @@ export default function CourseManagement() {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/courses/${courseId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -208,7 +209,7 @@ export default function CourseManagement() {
     const handleExportCourseStudents = async (courseId, courseCode) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/courses/${courseId}/students`, {
+            const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}/students`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 

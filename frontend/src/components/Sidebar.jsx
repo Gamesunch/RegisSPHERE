@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Award, Layers, Moon, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -22,7 +23,7 @@ export default function Sidebar({ activePath }) {
             }
             if (token) {
                 try {
-                    const res = await fetch('http://localhost:5000/api/admin/phase', {
+                    const res = await fetch(`${API_BASE_URL}/api/admin/phase`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (res.ok) {

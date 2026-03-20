@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { API_BASE_URL } from '../config';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, CheckCircle, Lock, Play, Layers, Send, Clock, MapPin, Filter } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = API_BASE_URL;
 import { useLanguage } from '../context/LanguageContext';
 import { StudyPathSkeleton } from '../components/SkeletonLoader';
 

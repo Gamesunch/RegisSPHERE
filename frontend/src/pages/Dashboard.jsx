@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config';
 import { motion } from 'framer-motion';
 import { Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -29,7 +30,7 @@ export default function Dashboard() {
         const fetchData = async () => {
             try {
                 // Fetch profile
-                const profileRes = await fetch('http://localhost:5000/api/profile', {
+                const profileRes = await fetch(`${API_BASE_URL}/api/profile`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 let currentUser = null;
@@ -51,7 +52,7 @@ export default function Dashboard() {
 
                 if (currentUser && currentUser.role === 'STUDENT') {
                     // Fetch real enrollments for student stats
-                    const enrollRes = await fetch('http://localhost:5000/api/enrollments/mine', {
+                    const enrollRes = await fetch(`${API_BASE_URL}/api/enrollments/mine`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (enrollRes.ok) {
@@ -114,7 +115,7 @@ export default function Dashboard() {
                     }
 
                     // Fetch student announcements
-                    const annRes = await fetch('http://localhost:5000/api/announcements/student', {
+                    const annRes = await fetch(`${API_BASE_URL}/api/announcements/student`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (annRes.ok) {
@@ -123,7 +124,7 @@ export default function Dashboard() {
                 }
 
                 if (currentUser && (currentUser.role === 'ADMIN' || currentUser.role === 'PROFESSOR')) {
-                    const phaseRes = await fetch('http://localhost:5000/api/admin/phase', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const phaseRes = await fetch(`${API_BASE_URL}/api/admin/phase`, { headers: { 'Authorization': `Bearer ${token}` } });
                     if (phaseRes.ok) {
                         const phaseData = await phaseRes.json();
                         setAdminPhase(phaseData.phase);
@@ -180,7 +181,7 @@ export default function Dashboard() {
                             <span style={{ position: 'absolute', top: '12px', right: '12px', width: '10px', height: '10px', background: '#ef4444', borderRadius: '50%', border: '2px solid var(--color-bg-light)' }}></span>
                         </motion.button>
                         {user.profilePictureUrl ? (
-                            <img src={`http://localhost:5000${user.profilePictureUrl}`} alt="Profile" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 10px rgba(217, 121, 4, 0.3)', cursor: 'pointer' }} />
+                            <img src={`${API_BASE_URL}${user.profilePictureUrl}`} alt="Profile" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 10px rgba(217, 121, 4, 0.3)', cursor: 'pointer' }} />
                         ) : (
                             <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--color-primary-dark)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(217, 121, 4, 0.3)', cursor: 'pointer' }}>
                                 {user.firstName ? user.firstName[0].toUpperCase() : 'U'}

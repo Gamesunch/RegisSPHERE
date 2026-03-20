@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config';
 import Sidebar from '../components/Sidebar';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -22,7 +23,7 @@ export default function ProfessorClassDetails() {
     const fetchStudents = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/courses/${courseId}/students`, {
+            const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}/students`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -39,7 +40,7 @@ export default function ProfessorClassDetails() {
     const fetchAnnouncements = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/announcements/course/${courseId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/announcements/course/${courseId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -61,7 +62,7 @@ export default function ProfessorClassDetails() {
     const handleDownload = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/courses/${courseId}/students/download`, {
+            const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}/students/download`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -83,7 +84,7 @@ export default function ProfessorClassDetails() {
     const handleGradeSave = async (enrollmentId) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/grades/${enrollmentId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/grades/${enrollmentId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -111,7 +112,7 @@ export default function ProfessorClassDetails() {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/announcements/course/${courseId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/announcements/course/${courseId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

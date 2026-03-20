@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 
 const authRoutes = require('./routes/authRoutes');
@@ -14,7 +15,16 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
-app.use(cors());
+app.use(helmet({
+    crossOriginResourcePolicy: false,
+}));
+
+// More refined CORS for production
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || '*',
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Serve uploaded files as static assets

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { API_BASE_URL } from '../config';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import Sidebar from '../components/Sidebar';
@@ -25,7 +26,7 @@ export default function StudentManagement() {
         }
         try {
             // Fetch profile
-            const profileRes = await fetch('http://localhost:5000/api/profile', {
+            const profileRes = await fetch(`${API_BASE_URL}/api/profile`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -40,7 +41,7 @@ export default function StudentManagement() {
             }
 
             // Fetch students
-            const studentsRes = await fetch('http://localhost:5000/api/admin/students', {
+            const studentsRes = await fetch(`${API_BASE_URL}/api/admin/students`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (studentsRes.ok) {
@@ -56,7 +57,7 @@ export default function StudentManagement() {
     const handleYearChange = async (studentId, newYear) => {
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`http://localhost:5000/api/admin/students/${studentId}/year`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/students/${studentId}/year`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
