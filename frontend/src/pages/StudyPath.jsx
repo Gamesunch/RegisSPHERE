@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, CheckCircle, Lock, Play, Layers, Send, Clock, MapPin, Filter } from 'lucide-react';
+import { BookOpen, CheckCircle, Lock, Play, Layers, Send, Clock, MapPin, Filter, Tag } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 
 const API_BASE = API_BASE_URL;
@@ -28,13 +28,15 @@ export default function StudyPath() {
     }, []);
 
     const tracks = useMemo(() => {
-        const uniqueTracks = [...new Set(courses.map(c => c.track))].filter(tr => tr && tr !== 'CORE' && tr !== 'OUTSIDE');
-        return ['ALL', ...uniqueTracks, 'OUTSIDE'];
+        const categories = [...new Set(courses.map(c => c.course_category).filter(Boolean))];
+        const electiveCategories = categories.filter(c => c !== 'CORE');
+        return ['ALL', ...electiveCategories];
     }, [courses]);
 
     const filteredCourses = useMemo(() => {
-        if (selectedTrack === 'ALL') return courses.filter(c => c.track === 'CORE' || c.track === 'OUTSIDE' || c.track === 'ALL' || !c.track);
-        return courses.filter(c => c.track === 'CORE' || c.track === selectedTrack);
+        if (selectedTrack === 'ALL') return courses;
+        // Show core courses + the selected elective category
+        return courses.filter(c => c.course_category === 'CORE' || c.course_category === selectedTrack);
     }, [courses, selectedTrack]);
 
     useEffect(() => {
@@ -160,6 +162,21 @@ export default function StudyPath() {
         { label: 'YEAR 4', sems: [8, 9], color: '#a78bfa' }
     ];
 
+    const getCategoryStyle = (category) => {
+        switch (category) {
+            case 'PROFESSIONAL_ELECTIVE': return { bg: 'rgba(59, 130, 246, 0.08)', border: '#3b82f6', text: '#60a5fa', label: 'Professional Elective' };
+            case 'LANGUAGE_ELECTIVE': return { bg: 'rgba(251, 146, 60, 0.08)', border: '#f97316', text: '#fb923c', label: 'Language Elective' };
+            case 'SOCIAL_SCIENCE_ELECTIVE': return { bg: 'rgba(168, 85, 247, 0.08)', border: '#a855f7', text: '#c084fc', label: 'Social Science Elective' };
+            case 'SCIENCE_MATH_ELECTIVE': return { bg: 'rgba(34, 197, 94, 0.08)', border: '#22c55e', text: '#4ade80', label: 'Science & Math Elective' };
+            case 'HUMANITIES_ELECTIVE': return { bg: 'rgba(236, 72, 153, 0.08)', border: '#ec4899', text: '#f472b6', label: 'Humanities Elective' };
+            case 'SPORT_ELECTIVE': return { bg: 'rgba(20, 184, 166, 0.08)', border: '#14b8a6', text: '#2dd4bf', label: 'Sport & Recreation' };
+            case 'FREE_ELECTIVE': return { bg: 'rgba(156, 163, 175, 0.08)', border: '#9ca3af', text: '#d1d5db', label: 'Free Elective' };
+            default: return null;
+        }
+    };
+
+    const isElective = (course) => course.course_category && course.course_category !== 'CORE';
+
     const getCourseStatus = (course) => {
         const enrollment = myEnrollments.find(e => e.id === course.id);
         if (enrollment) {
@@ -233,30 +250,34 @@ export default function StudyPath() {
 
                         
                         {/* Track Selector */}
-                        <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            {tracks.map(trackItem => (
-                                <button
-                                    key={trackItem}
-                                    onClick={() => setSelectedTrack(trackItem)}
-                                    style={{
-                                        padding: '6px 12px',
-                                        borderRadius: '8px',
-                                        border: 'none',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 700,
-                                        cursor: 'pointer',
-                                        background: selectedTrack === trackItem ? 'var(--color-primary)' : 'transparent',
-                                        color: selectedTrack === trackItem ? 'white' : 'var(--color-text-muted)',
-                                        transition: 'all 0.2s ease',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px'
-                                    }}
-                                >
-                                    {trackItem === 'ALL' ? <Filter size={12} /> : null}
-                                    {trackItem ? t(trackItem.toLowerCase()) : trackItem}
-                                </button>
-                            ))}
+                        <div style={{ display: 'flex', gap: '6px', background: 'rgba(255,255,255,0.05)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', flexWrap: 'wrap' }}>
+                            {tracks.map(trackItem => {
+                                const catStyle = getCategoryStyle(trackItem);
+                                return (
+                                    <button
+                                        key={trackItem}
+                                        onClick={() => setSelectedTrack(trackItem)}
+                                        style={{
+                                            padding: '6px 12px',
+                                            borderRadius: '8px',
+                                            border: selectedTrack === trackItem ? `1px solid ${catStyle?.border || 'var(--color-primary)'}` : '1px solid transparent',
+                                            fontSize: '0.7rem',
+                                            fontWeight: 700,
+                                            cursor: 'pointer',
+                                            background: selectedTrack === trackItem ? (catStyle?.bg || 'var(--color-primary)') : 'transparent',
+                                            color: selectedTrack === trackItem ? (catStyle?.text || 'white') : 'var(--color-text-muted)',
+                                            transition: 'all 0.2s ease',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        {trackItem === 'ALL' ? <Filter size={12} /> : <Tag size={10} />}
+                                        {trackItem === 'ALL' ? t('all') || 'All' : (catStyle?.label || trackItem)}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </header>
 
@@ -344,7 +365,13 @@ export default function StudyPath() {
                                                     className="glass-panel course-card-inner"
                                                     style={{ 
                                                         padding: '1.2rem', 
-                                                        borderLeft: `4px solid ${color}`,
+                                                        borderLeft: `4px solid ${isElective(course) ? (getCategoryStyle(course.course_category)?.border || color) : color}`,
+                                                        borderStyle: isElective(course) ? 'dashed' : 'solid',
+                                                        borderWidth: isElective(course) ? '1px' : undefined,
+                                                        borderLeftWidth: '4px',
+                                                        borderColor: isElective(course) ? (getCategoryStyle(course.course_category)?.border || 'rgba(255,255,255,0.1)') : undefined,
+                                                        borderLeftColor: isElective(course) ? (getCategoryStyle(course.course_category)?.border || color) : color,
+                                                        background: isElective(course) ? (getCategoryStyle(course.course_category)?.bg || undefined) : undefined,
                                                         position: 'relative',
                                                         zIndex: 1,
                                                         opacity: status === 'LOCKED' ? 0.6 : 1,
@@ -365,9 +392,33 @@ export default function StudyPath() {
                                                         </span>
                                                     </div>
                                                     
-                                                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text)', lineHeight: 1.3, marginBottom: '0.8rem', flexGrow: 1 }}>
+                                                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text)', lineHeight: 1.3, marginBottom: '0.5rem', flexGrow: 1 }}>
                                                         {course.name}
                                                     </div>
+
+                                                    {isElective(course) && (() => {
+                                                        const catStyle = getCategoryStyle(course.course_category);
+                                                        return catStyle ? (
+                                                            <div style={{
+                                                                fontSize: '0.6rem',
+                                                                fontWeight: 700,
+                                                                color: catStyle.text,
+                                                                background: catStyle.bg,
+                                                                border: `1px solid ${catStyle.border}33`,
+                                                                padding: '2px 8px',
+                                                                borderRadius: '4px',
+                                                                marginBottom: '0.6rem',
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                gap: '4px',
+                                                                letterSpacing: '0.3px',
+                                                                textTransform: 'uppercase'
+                                                            }}>
+                                                                <Tag size={9} />
+                                                                {catStyle.label}
+                                                            </div>
+                                                        ) : null;
+                                                    })()}
 
                                                     {course.min_year > 1 && (
                                                         <div style={{ 
