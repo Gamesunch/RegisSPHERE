@@ -86,32 +86,8 @@ export default function Register() {
                         <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>Regis</span>
                         <span style={{ fontWeight: 800, letterSpacing: '1px', color: 'white', background: 'var(--color-primary-dark)', padding: '0 12px', borderRadius: '12px' }}>SPHERE</span>
                     </h1>
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('register_subtitle')}</p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem' }}>
-                    {['STUDENT', 'PROFESSOR'].map(r => (
-                        <button
-                            key={r}
-                            onClick={(e) => { e.preventDefault(); setRole(r); }}
-                            style={{
-                                flex: 1,
-                                padding: '0.8rem',
-                                borderRadius: '10px',
-                                border: `1px solid ${role === r ? 'var(--color-secondary)' : 'var(--glass-border)'}`,
-                                background: role === r ? 'var(--color-secondary)' : 'var(--color-bg-light)',
-                                color: role === r ? 'white' : 'var(--color-text)',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s',
-                                fontFamily: 'var(--font-main)',
-                                fontWeight: role === r ? 600 : 500,
-                                boxShadow: role === r ? '0 4px 12px rgba(46, 167, 242, 0.25)' : 'inset 0 2px 4px rgba(0,0,0,0.02)'
-                            }}
-                        >
-                            {t(r.toLowerCase())}
-                        </button>
-                    ))}
-                </div>
 
                 <form onSubmit={handleRegister}>
                     {errorMsg && (

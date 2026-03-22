@@ -81,7 +81,6 @@ export default function Login() {
                         <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>Regis</span>
                         <span style={{ fontWeight: 800, letterSpacing: '1px', color: 'white', background: 'var(--color-primary-dark)', padding: '0 12px', borderRadius: '12px' }}>SPHERE</span>
                     </h1>
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('login_subtitle')}</p>
                 </div>
 
 
@@ -132,12 +131,11 @@ export default function Login() {
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', fontSize: '0.95rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: '2.5rem', fontSize: '0.95rem' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                             <input type="checkbox" style={{ accentColor: 'var(--color-primary)', width: '16px', height: '16px' }} />
                             <span style={{ color: 'var(--color-text-muted)' }}>{t('remember_me')}</span>
                         </label>
-                        <a href="#" style={{ color: 'var(--color-secondary)', textDecoration: 'none', fontWeight: 500 }}>{t('forgot_password')}</a>
                     </div>
 
                     <motion.button
