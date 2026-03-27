@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { BookOpen, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import { ProfessorCoursesPageSkeleton } from '../components/SkeletonLoader';
 
 export default function ProfessorCourses() {
@@ -44,7 +43,6 @@ export default function ProfessorCourses() {
                             <h1 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0 }}>{t('my_classes')}</h1>
                             <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', marginTop: '0.5rem' }}>{t('manage_courses_desc')}</p>
                         </div>
-                        <LanguageSwitcher />
                     </header>
                     {loading ? (
                         <ProfessorCoursesPageSkeleton />

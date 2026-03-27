@@ -5,7 +5,6 @@ import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Download, Save } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import { ProfessorClassDetailsSkeleton } from '../components/SkeletonLoader';
 
 export default function ProfessorClassDetails() {
@@ -146,7 +145,6 @@ export default function ProfessorClassDetails() {
                             <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', marginTop: '0.5rem' }}>{t('manage_students_desc')}</p>
                         </div>
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                            <LanguageSwitcher />
                             <button className="btn btn-primary" onClick={handleDownload} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <Download size={18} /> {t('download_csv')}
                             </button>
