@@ -58,10 +58,10 @@ exports.createCourse = async (req, res) => {
 
         const result = await db.query(
             `INSERT INTO courses 
-        (name, code, description, credits, schedule_time, room, capacity, min_year, semester_number, track) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
+        (name, code, description, credits, schedule_time, room, capacity, min_year, semester_number, track, course_category) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
        RETURNING *`,
-            [name, code, description, credits, schedule_time, room, capacity, req.body.min_year || 1, req.body.semester_number, req.body.track]
+            [name, code, description, credits, schedule_time, room, capacity, req.body.min_year || 1, req.body.semester_number || 1, req.body.track || 'CORE', req.body.course_category || 'CORE']
         );
         const newCourse = result.rows[0];
 
@@ -89,9 +89,13 @@ exports.updateCourse = async (req, res) => {
 
         const result = await db.query(
             `UPDATE courses 
-             SET name=$1, code=$2, description=$3, credits=$4, schedule_time=$5, room=$6, capacity=$7, min_year=$8, semester_number=$9, track=$10
-             WHERE id=$11 RETURNING *`,
-            [name, code, description, credits, schedule_time, room, capacity, req.body.min_year, req.body.semester_number, req.body.track, id]
+             SET name=$1, code=$2, description=$3, credits=$4, schedule_time=$5, room=$6, capacity=$7, 
+                 min_year=$8, 
+                 semester_number = COALESCE($9, semester_number), 
+                 track = COALESCE($10, track),
+                 course_category = COALESCE($11, course_category)
+             WHERE id=$12 RETURNING *`,
+            [name, code, description, credits, schedule_time, room, capacity, req.body.min_year, req.body.semester_number || null, req.body.track || null, req.body.course_category || null, id]
         );
 
         if (result.rows.length === 0) {

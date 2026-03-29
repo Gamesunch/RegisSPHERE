@@ -7,6 +7,43 @@ import { useNavigate } from 'react-router-dom';
 import { Bell, Plus, Edit2, Trash2, Download, Users, X, Check, Search } from 'lucide-react';
 import { TablePageSkeleton } from '../components/SkeletonLoader';
 
+const COURSE_CATEGORIES = [
+    { value: 'CORE', label: 'Core Course' },
+    { value: 'PROFESSIONAL_ELECTIVE', label: 'Professional Elective' },
+    { value: 'LANGUAGE_ELECTIVE', label: 'Language Elective' },
+    { value: 'SOCIAL_SCIENCE_ELECTIVE', label: 'Social Science Elective' },
+    { value: 'SCIENCE_MATH_ELECTIVE', label: 'Science & Math Elective' },
+    { value: 'HUMANITIES_ELECTIVE', label: 'Humanities Elective' },
+    { value: 'SPORT_ELECTIVE', label: 'Sport & Recreation' },
+    { value: 'FREE_ELECTIVE', label: 'Free Elective' },
+];
+
+const TRACK_OPTIONS = [
+    { value: 'CORE', label: 'Core' },
+    { value: 'COOP', label: 'Co-op' },
+    { value: 'REGULAR', label: 'Regular' },
+    { value: 'FULLSTACK', label: 'Full-Stack' },
+    { value: 'SECURITY_NETWORK', label: 'Security & Network' },
+    { value: 'GAME_GRAPHIC', label: 'Game & Graphic' },
+    { value: 'IOT_ROBOT', label: 'IoT & Robot' },
+    { value: 'AI', label: 'AI' },
+    { value: 'OUTSIDE', label: 'Outside of Track' },
+];
+
+const DEFAULT_FORM = {
+    code: '',
+    name: '',
+    credits: 3,
+    capacity: 30,
+    min_year: 1,
+    professor_ids: [],
+    room: '',
+    description: '',
+    semester_number: 1,
+    course_category: 'CORE',
+    track: 'CORE',
+};
+
 export default function CourseManagement() {
     const navigate = useNavigate();
     const { t } = useLanguage();
@@ -28,16 +65,15 @@ export default function CourseManagement() {
     const [startTime, setStartTime] = useState('10:00');
     const [endTime, setEndTime] = useState('11:30');
 
-    const [newCourse, setNewCourse] = useState({
-        code: '',
-        name: '',
-        credits: 3,
-        capacity: 30,
-        min_year: 1,
-        professor_ids: [],
-        room: '',
-        description: ''
-    });
+    const [newCourse, setNewCourse] = useState({ ...DEFAULT_FORM });
+
+    const resetForm = () => {
+        setNewCourse({ ...DEFAULT_FORM });
+        setScheduleDay('Mon');
+        setStartTime('10:00');
+        setEndTime('11:30');
+        setProfSearch('');
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -87,12 +123,29 @@ export default function CourseManagement() {
         fetchData();
     }, [navigate]);
 
+    const handleOpenAddModal = () => {
+        resetForm();
+        setShowAddModal(true);
+    };
+
+    const handleCloseEditModal = () => {
+        setShowEditModal(false);
+        setEditingCourse(null);
+        resetForm();
+    };
+
     const handleAddCourse = async (e) => {
         e.preventDefault();
 
         // Combine schedule inputs
         const combinedSchedule = `${scheduleDay} ${startTime}-${endTime}`;
-        const courseData = { ...newCourse, schedule_time: combinedSchedule };
+        const courseData = { 
+            ...newCourse, 
+            schedule_time: combinedSchedule,
+            semester_number: newCourse.semester_number,
+            course_category: newCourse.course_category,
+            track: newCourse.track,
+        };
 
         try {
             const token = localStorage.getItem('token');
@@ -109,14 +162,7 @@ export default function CourseManagement() {
                 const data = await res.json();
                 setCourses([...courses, data.course]);
                 setShowAddModal(false);
-                setNewCourse({
-                    code: '', name: '', credits: 3, capacity: 30, min_year: 1,
-                    professor_ids: [],
-                    room: '', description: ''
-                });
-                setScheduleDay('Mon');
-                setStartTime('10:00');
-                setEndTime('11:30');
+                resetForm();
             } else {
                 const errData = await res.json();
                 alert(errData.error || t('failed_to_create_course'));
@@ -136,7 +182,10 @@ export default function CourseManagement() {
             min_year: course.min_year || 1,
             professor_ids: course.professors ? course.professors.map(p => p.id) : [],
             room: course.room || '',
-            description: course.description || ''
+            description: course.description || '',
+            semester_number: course.semester_number,
+            track: course.track,
+            course_category: course.course_category
         });
 
         // Parse schedule_time
@@ -157,7 +206,13 @@ export default function CourseManagement() {
     const handleUpdateCourse = async (e) => {
         e.preventDefault();
         const combinedSchedule = `${scheduleDay} ${startTime}-${endTime}`;
-        const courseData = { ...newCourse, schedule_time: combinedSchedule };
+        const courseData = { 
+            ...newCourse, 
+            schedule_time: combinedSchedule,
+            semester_number: newCourse.semester_number,
+            track: newCourse.track,
+            course_category: newCourse.course_category
+        };
 
         try {
             const token = localStorage.getItem('token');
@@ -289,7 +344,7 @@ export default function CourseManagement() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <h3 style={{ fontSize: '1.4rem', fontWeight: 600 }}>{t('all_courses')}</h3>
                         <button className="btn"
-                            onClick={() => setShowAddModal(true)}
+                            onClick={handleOpenAddModal}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '0.5rem',
                                 background: 'var(--color-primary)', color: 'white',
@@ -356,8 +411,8 @@ export default function CourseManagement() {
             {/* Add Course Modal */}
             {showAddModal && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem', position: 'relative' }}>
-                    <button onClick={() => setShowAddModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}>
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
+                    <button onClick={() => { setShowAddModal(false); resetForm(); }} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}>
                         <X size={24} />
                     </button>
                     <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>{t('add_new_course')}</h2>
@@ -394,6 +449,39 @@ export default function CourseManagement() {
                                 <input type="text" value={newCourse.room} onChange={e => setNewCourse({ ...newCourse, room: e.target.value })} className="input-field" style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', width: '100%' }} />
                             </div>
                         </div>
+                        {/* Semester, Category, Track */}
+                        <div style={{ display: 'grid', gridTemplateColumns: newCourse.course_category === 'PROFESSIONAL_ELECTIVE' ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('semester') || 'Semester'}</label>
+                                <select value={newCourse.semester_number} onChange={e => setNewCourse({ ...newCourse, semester_number: parseInt(e.target.value) })} style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', width: '100%', fontFamily: 'var(--font-main)' }}>
+                                    {[1,2,3,4,5,6,7,8,9].map(s => (
+                                        <option key={s} value={s}>{t('semester') || 'Semester'} {s}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('category') || 'Category'}</label>
+                                <select value={newCourse.course_category} onChange={e => {
+                                    const cat = e.target.value;
+                                    const autoTrack = cat === 'CORE' ? 'CORE' : cat === 'PROFESSIONAL_ELECTIVE' ? 'FULLSTACK' : 'OUTSIDE';
+                                    setNewCourse({ ...newCourse, course_category: cat, track: autoTrack });
+                                }} style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', width: '100%', fontFamily: 'var(--font-main)' }}>
+                                    {COURSE_CATEGORIES.map(cat => (
+                                        <option key={cat.value} value={cat.value}>{cat.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            {newCourse.course_category === 'PROFESSIONAL_ELECTIVE' && (
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('track') || 'Track'}</label>
+                                    <select value={newCourse.track} onChange={e => setNewCourse({ ...newCourse, track: e.target.value })} style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', width: '100%', fontFamily: 'var(--font-main)' }}>
+                                        {TRACK_OPTIONS.filter(t => !['CORE', 'COOP', 'REGULAR'].includes(t.value)).map(tr => (
+                                            <option key={tr.value} value={tr.value}>{tr.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text)', fontSize: '0.95rem' }}>{t('assign_professors')} <span style={{ fontWeight: 'normal', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>({t('optional')})</span></label>
                             {/* Selected professors as chips */}
@@ -457,7 +545,7 @@ export default function CourseManagement() {
                             <input type="time" required value={endTime} onChange={(e) => setEndTime(e.target.value)} style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)' }} />
                         </div>
                         <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                            <button type="button" onClick={() => setShowAddModal(false)} style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>{t('cancel')}</button>
+                            <button type="button" onClick={() => { setShowAddModal(false); resetForm(); }} style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>{t('cancel')}</button>
                             <button type="submit" style={{ flex: 1, padding: '0.8rem', background: 'var(--color-primary)', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(242, 159, 5, 0.3)' }}>{t('create_course_btn')}</button>
                         </div>
                     </form>
@@ -468,8 +556,8 @@ export default function CourseManagement() {
             {/* Edit Course Modal */}
             {showEditModal && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem', position: 'relative' }}>
-                    <button onClick={() => setShowEditModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}>
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
+                    <button onClick={handleCloseEditModal} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}>
                         <X size={24} />
                     </button>
                     <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>{t('edit_course')}</h2>
@@ -506,6 +594,39 @@ export default function CourseManagement() {
                                 <input type="text" value={newCourse.room} onChange={e => setNewCourse({ ...newCourse, room: e.target.value })} className="input-field" style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', width: '100%' }} />
                             </div>
                         </div>
+                        {/* Semester, Category, Track */}
+                        <div style={{ display: 'grid', gridTemplateColumns: newCourse.course_category === 'PROFESSIONAL_ELECTIVE' ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('semester') || 'Semester'}</label>
+                                <select value={newCourse.semester_number || 1} onChange={e => setNewCourse({ ...newCourse, semester_number: parseInt(e.target.value) })} style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', width: '100%', fontFamily: 'var(--font-main)' }}>
+                                    {[1,2,3,4,5,6,7,8,9].map(s => (
+                                        <option key={s} value={s}>{t('semester') || 'Semester'} {s}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('category') || 'Category'}</label>
+                                <select value={newCourse.course_category || 'CORE'} onChange={e => {
+                                    const cat = e.target.value;
+                                    const autoTrack = cat === 'CORE' ? 'CORE' : cat === 'PROFESSIONAL_ELECTIVE' ? 'FULLSTACK' : 'OUTSIDE';
+                                    setNewCourse({ ...newCourse, course_category: cat, track: autoTrack });
+                                }} style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', width: '100%', fontFamily: 'var(--font-main)' }}>
+                                    {COURSE_CATEGORIES.map(cat => (
+                                        <option key={cat.value} value={cat.value}>{cat.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            {newCourse.course_category === 'PROFESSIONAL_ELECTIVE' && (
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('track') || 'Track'}</label>
+                                    <select value={newCourse.track} onChange={e => setNewCourse({ ...newCourse, track: e.target.value })} style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', width: '100%', fontFamily: 'var(--font-main)' }}>
+                                        {TRACK_OPTIONS.filter(t => !['CORE', 'COOP', 'REGULAR'].includes(t.value)).map(tr => (
+                                            <option key={tr.value} value={tr.value}>{tr.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text)', fontSize: '0.95rem' }}>{t('assign_professors')} <span style={{ fontWeight: 'normal', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>({t('optional')})</span></label>
                             {/* Selected professors as chips */}
@@ -569,7 +690,7 @@ export default function CourseManagement() {
                             <input type="time" required value={endTime} onChange={(e) => setEndTime(e.target.value)} style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)' }} />
                         </div>
                         <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                            <button type="button" onClick={() => setShowEditModal(false)} style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>{t('cancel')}</button>
+                            <button type="button" onClick={handleCloseEditModal} style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>{t('cancel')}</button>
                             <button type="submit" style={{ flex: 1, padding: '0.8rem', background: 'var(--color-primary)', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(242, 159, 5, 0.3)' }}>{t('update_course_btn')}</button>
                         </div>
                     </form>

@@ -306,12 +306,13 @@ export default function StudyPath() {
         setExpandedElectives(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
-    // Group elective courses in a semester for collapsible display
+    // Group ALL elective courses in a semester by category for collapsible display
     const getElectiveGroups = (semCourses) => {
         const groups = {};
-        semCourses.filter(c => isProfessionalElective(c)).forEach(c => {
-            if (!groups['PROFESSIONAL_ELECTIVE']) groups['PROFESSIONAL_ELECTIVE'] = [];
-            groups['PROFESSIONAL_ELECTIVE'].push(c);
+        semCourses.filter(c => isElective(c)).forEach(c => {
+            const cat = c.course_category;
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(c);
         });
         return groups;
     };
@@ -474,12 +475,19 @@ export default function StudyPath() {
         );
     };
 
-    // Render a collapsible elective group (Professional Elective dropdown)
-    const renderElectiveGroup = (sem, electiveCourses) => {
-        const groupKey = `prof_elective_${sem}`;
+    // Render a collapsible elective group for ANY elective category
+    const renderElectiveGroup = (sem, category, electiveCourses) => {
+        const groupKey = `${category}_${sem}`;
         const isExpanded = expandedElectives[groupKey];
         const availableCount = electiveCourses.length;
-        const slotsNeeded = PROF_ELECTIVE_SLOTS[programPlan]?.[sem] || 0;
+        const catStyle = getCategoryStyle(category);
+        const accentColor = catStyle?.border || '#6b7280';
+        const textColor = catStyle?.text || '#d1d5db';
+        const bgColor = catStyle?.bg || 'rgba(107, 114, 128, 0.06)';
+        const label = catStyle?.label || category;
+        
+        // Only professional electives have required slot counts
+        const slotsNeeded = category === 'PROFESSIONAL_ELECTIVE' ? (PROF_ELECTIVE_SLOTS[programPlan]?.[sem] || 0) : 0;
         
         if (availableCount === 0) return null;
 
@@ -491,13 +499,13 @@ export default function StudyPath() {
                     className="glass-panel"
                     style={{
                         padding: '0.8rem 1rem',
-                        borderLeft: '4px solid #3b82f6',
+                        borderLeft: `4px solid ${accentColor}`,
                         borderStyle: 'dashed',
                         borderWidth: '1px',
                         borderLeftWidth: '4px',
-                        borderColor: '#3b82f644',
-                        borderLeftColor: '#3b82f6',
-                        background: 'rgba(59, 130, 246, 0.06)',
+                        borderColor: `${accentColor}44`,
+                        borderLeftColor: accentColor,
+                        background: bgColor,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -508,32 +516,32 @@ export default function StudyPath() {
                     }}
                 >
                     <div>
-                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#3b82f6', letterSpacing: '0.5px', marginBottom: '4px' }}>
-                            040613xxx
+                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: textColor, letterSpacing: '0.5px', marginBottom: '4px', textTransform: 'uppercase' }}>
+                            {label}
                         </div>
                         <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', lineHeight: 1.3 }}>
-                            {slotsNeeded > 1 ? `${slotsNeeded} × ` : ''}Professional Elective Course
+                            {slotsNeeded > 1 ? `${slotsNeeded} × ` : ''}{label} Course
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
                             {slotsNeeded > 0 && (
                                 <span style={{ 
                                     fontSize: '0.6rem', 
                                     fontWeight: 700, 
-                                    color: '#60a5fa', 
-                                    background: 'rgba(59, 130, 246, 0.12)', 
+                                    color: textColor, 
+                                    background: bgColor, 
                                     padding: '2px 7px', 
                                     borderRadius: '4px',
-                                    border: '1px solid rgba(59, 130, 246, 0.2)'
+                                    border: `1px solid ${accentColor}33`
                                 }}>
                                     Enroll {slotsNeeded} course{slotsNeeded > 1 ? 's' : ''}
                                 </span>
                             )}
                             <span style={{ fontSize: '0.58rem', color: 'var(--color-text-muted)' }}>
-                                {availableCount} available • 3 cr each
+                                {availableCount} available
                             </span>
                         </div>
                     </div>
-                    <div style={{ color: '#3b82f6', display: 'flex', alignItems: 'center' }}>
+                    <div style={{ color: textColor, display: 'flex', alignItems: 'center' }}>
                         {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </div>
                 </motion.div>
@@ -547,7 +555,7 @@ export default function StudyPath() {
                             transition={{ duration: 0.2 }}
                             style={{ overflow: 'hidden', marginTop: '0.5rem' }}
                         >
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', paddingLeft: '0.5rem', borderLeft: '2px solid rgba(59, 130, 246, 0.2)' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', paddingLeft: '0.5rem', borderLeft: `2px solid ${accentColor}33` }}>
                                 {electiveCourses.map(course => renderCourseCard(course))}
                             </div>
                         </motion.div>
@@ -758,11 +766,8 @@ export default function StudyPath() {
                         <div style={{ display: 'flex', gap: '2.5rem' }}>
                             {semesters.map(sem => {
                                 const semCourses = filteredCourses.filter(c => c.semester_number === sem);
-                                const coreSemCourses = semCourses.filter(c => !isProfessionalElective(c));
-                                const profElectiveCourses = semCourses.filter(c => isProfessionalElective(c));
-
-                                // Determine if we should collapse professional electives
-                                const shouldCollapse = selectedTrack === 'ALL' && profElectiveCourses.length > 2;
+                                const coreSemCourses = semCourses.filter(c => !isElective(c));
+                                const electiveGroups = getElectiveGroups(semCourses);
 
                                 return (
                                     <div key={sem} style={{ minWidth: '220px', flex: 1 }}>
@@ -781,15 +786,20 @@ export default function StudyPath() {
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
                                             <AnimatePresence mode="popLayout">
-                                                {/* Core + non-professional-elective courses */}
+                                                {/* Core courses */}
                                                 {coreSemCourses.map(course => renderCourseCard(course))}
 
-                                                {/* Professional electives: collapse or expand */}
-                                                {shouldCollapse ? (
-                                                    renderElectiveGroup(sem, profElectiveCourses)
-                                                ) : (
-                                                    profElectiveCourses.map(course => renderCourseCard(course))
-                                                )}
+                                                {/* All elective groups: each category gets a collapsible dropdown */}
+                                                {Object.entries(electiveGroups).map(([category, courses]) => {
+                                                    // For professional electives, collapse when viewing all tracks and >2 courses
+                                                    const shouldCollapse = category === 'PROFESSIONAL_ELECTIVE'
+                                                        ? (selectedTrack === 'ALL' && courses.length > 2)
+                                                        : courses.length >= 1;
+                                                    
+                                                    return shouldCollapse
+                                                        ? renderElectiveGroup(sem, category, courses)
+                                                        : courses.map(course => renderCourseCard(course));
+                                                })}
                                             </AnimatePresence>
                                         </div>
                                     </div>
